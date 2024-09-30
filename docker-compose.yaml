@@ -1,0 +1,27 @@
+volumes:
+  postgres_data:
+
+services:
+  db:
+    image: postgres
+    container_name: why-to-wait-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-why-to-wait}
+      POSTGRES_SCHEMA: ${POSTGRES_SCHEMA:-public}
+    volumes:
+      - postgres_data:/data/postgres
+    ports:
+      - 5432:5432
+
+  pgAdmin:
+    image: dpage/pgadmin4
+    container_name: why-to-wait-pgAdmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@gmail.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - 5000:80
