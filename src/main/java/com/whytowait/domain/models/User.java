@@ -1,7 +1,8 @@
 package com.whytowait.domain.models;
 
-import com.whytowait.domain.models.Enums.MerchantType;
+import com.whytowait.domain.models.Enums.UserRole;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,10 +13,14 @@ import java.util.UUID;
 
 @Data
 @Entity
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "email"),
+        @UniqueConstraint(columnNames = "mobile"),
+        @UniqueConstraint(columnNames = "googleId")
+})
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "merchant")
-public class Merchant {
+public class User {
 
     @Id
     @GeneratedValue
@@ -23,25 +28,31 @@ public class Merchant {
 
     @NotNull
     @Column(nullable = false)
-    private String restaurantName;
+    private String firstName;
+
+    private String lastName;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "address_id", referencedColumnName = "id", nullable = false)
-    private Address address;
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private Boolean emailVerified = false;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
-    private User owner;
+    @Column(nullable = false, unique = true)
+    private String mobile;
 
-    @NotNull
+    @Column(nullable = false)
+    private Boolean mobileVerified = false;
+
+    @Column(unique = true)
+    private String googleId;
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private MerchantType type = MerchantType.DINE_IN;
+    private UserRole role;
 
-    @Column(nullable = false)
-    private Boolean isOnline = false;
+    private Instant lastLogout;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

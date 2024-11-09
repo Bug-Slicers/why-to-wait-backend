@@ -1,6 +1,5 @@
 package com.whytowait.domain.models;
 
-import com.whytowait.domain.models.Enums.MerchantType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -14,34 +13,21 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "merchant")
-public class Merchant {
+@Table(name = "qr_code")
+public class QrCode {
 
     @Id
     @GeneratedValue
     private UUID id;
 
-    @NotNull
-    @Column(nullable = false)
-    private String restaurantName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "table_id", referencedColumnName = "id")
+    private MerchantTable table;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "address_id", referencedColumnName = "id", nullable = false)
-    private Address address;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
-    private User owner;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private MerchantType type = MerchantType.DINE_IN;
-
-    @Column(nullable = false)
-    private Boolean isOnline = false;
+    @JoinColumn(name = "merchant_id", referencedColumnName = "id", nullable = false)
+    private Merchant merchant;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
