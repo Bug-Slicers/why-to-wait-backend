@@ -26,9 +26,8 @@ public class Timing {
     private UUID id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "merchant_id", referencedColumnName = "id", nullable = false)
-    private Merchant merchant;
+    @Column(name = "merchant_id", nullable = false)
+    private UUID merchantId;
 
     @NotNull
     @Enumerated(EnumType.STRING)

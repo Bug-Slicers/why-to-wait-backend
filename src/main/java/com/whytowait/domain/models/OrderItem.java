@@ -22,14 +22,12 @@ public class OrderItem {
     private UUID id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id", referencedColumnName = "id", nullable = false)
-    private MenuItem item;
+    @Column(name = "item_id", nullable = false)
+    private UUID itemId;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", referencedColumnName = "id", nullable = false)
-    private Order order;
+    @Column(name = "order_id", nullable = false)
+    private UUID orderId;
 
     private String instruction;
 

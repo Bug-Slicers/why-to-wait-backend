@@ -20,14 +20,12 @@ public class QrCode {
     @GeneratedValue
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "table_id", referencedColumnName = "id")
-    private MerchantTable table;
-
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "merchant_id", referencedColumnName = "id", nullable = false)
-    private Merchant merchant;
+    @Column(name = "merchant_id", nullable = false)
+    private UUID merchantId;
+
+    @Column(name = "table_id", nullable = true)
+    private UUID tableId;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
