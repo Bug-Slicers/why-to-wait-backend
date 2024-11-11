@@ -1,11 +1,8 @@
 package com.whytowait.domain.models;
 
 import com.whytowait.domain.models.Enums.OrderItemStatus;
-import com.whytowait.domain.models.Enums.OrderStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,16 +14,44 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-
+@Table(name = "order_item")
 public class OrderItem {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID Id;
-    private UUID ItemId;
-    private UUID OrderId;
-    private String Instruction;
-    private int Quantity;
-    private double Amount;
-    private OrderItemStatus ItemStatus;
-    private Instant CreatedAt;
+    @GeneratedValue
+    private UUID id;
+
+    @NotNull
+    @Column(name = "item_id", nullable = false)
+    private UUID itemId;
+
+    @NotNull
+    @Column(name = "order_id", nullable = false)
+    private UUID orderId;
+
+    private String instruction;
+
+    @Column(nullable = false)
+    private int quantity;
+
+    @Column(nullable = false)
+    private float amount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderItemStatus status = OrderItemStatus.PREPARING;
+
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        Instant now = Instant.now();
+        createdAt = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        // No need to update createdAt as it is set only once during persist
+    }
 }

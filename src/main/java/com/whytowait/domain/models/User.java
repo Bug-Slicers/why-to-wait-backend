@@ -1,6 +1,6 @@
 package com.whytowait.domain.models;
 
-import com.whytowait.domain.models.Enums.DayOfWeek;
+import com.whytowait.domain.models.Enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -9,39 +9,50 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-import java.time.LocalTime;
 import java.util.UUID;
 
 @Data
 @Entity
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "email"),
+        @UniqueConstraint(columnNames = "mobile"),
+        @UniqueConstraint(columnNames = "googleId")
+})
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "timing", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"merchant_id", "dayOfWeek"})
-})
-public class Timing {
+public class User {
 
     @Id
     @GeneratedValue
     private UUID id;
 
     @NotNull
-    @Column(name = "merchant_id", nullable = false)
-    private UUID merchantId;
+    @Column(nullable = false)
+    private String firstName;
+
+    private String lastName;
 
     @NotNull
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private Boolean emailVerified = false;
+
+    @NotNull
+    @Column(nullable = false, unique = true)
+    private String mobile;
+
+    @Column(nullable = false)
+    private Boolean mobileVerified = false;
+
+    @Column(unique = true)
+    private String googleId;
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private DayOfWeek dayOfWeek;
+    private UserRole role;
 
-    @Column
-    private LocalTime openTime;
-
-    @Column
-    private LocalTime closeTime;
-
-    @Column(nullable = false)
-    private Boolean isClosed = false;
+    private Instant lastLogout;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

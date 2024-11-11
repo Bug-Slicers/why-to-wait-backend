@@ -1,25 +1,22 @@
 package com.whytowait.domain.models;
 
-import com.whytowait.domain.models.Enums.DayOfWeek;
 import jakarta.persistence.*;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-import java.time.LocalTime;
 import java.util.UUID;
 
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "timing", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"merchant_id", "dayOfWeek"})
+@Table(name = "merchant_table", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"merchant_id", "tableNumber"})
 })
-public class Timing {
+public class MerchantTable {
 
     @Id
     @GeneratedValue
@@ -30,18 +27,8 @@ public class Timing {
     private UUID merchantId;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private DayOfWeek dayOfWeek;
-
-    @Column
-    private LocalTime openTime;
-
-    @Column
-    private LocalTime closeTime;
-
-    @Column(nullable = false)
-    private Boolean isClosed = false;
+    private int tableNumber;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

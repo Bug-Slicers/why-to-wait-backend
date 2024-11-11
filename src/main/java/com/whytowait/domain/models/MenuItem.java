@@ -1,11 +1,8 @@
 package com.whytowait.domain.models;
 
-
 import com.whytowait.domain.models.Enums.ItemTag;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,18 +14,55 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "menu_item")
 public class MenuItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID Id;
 
-    private UUID MerchantId;
-    private String Name;
-    private String Description;
-    private UUID CategoryId;
-    private ItemTag Tag;
-    private double Price;
-    private String ImageUrl;
-    private Instant CreatedAt;
-    private Instant UpdatedAt;
+    @Id
+    @GeneratedValue
+    private UUID id;
+
+    @NotNull
+    @Column(name = "merchant_id", nullable = false)
+    private UUID merchantId;
+
+    @NotNull
+    @Column(nullable = false)
+    private String name;
+
+    @Column
+    private String description;
+
+    @NotNull
+    @Column(name = "category_id", nullable = false)
+    private UUID categoryId;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ItemTag tag;
+
+    @NotNull
+    @Column(nullable = false)
+    private Float price;
+
+    @Column
+    private String imageUrl;
+
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(nullable = false)
+    private Instant updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        Instant now = Instant.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = Instant.now();
+    }
 }

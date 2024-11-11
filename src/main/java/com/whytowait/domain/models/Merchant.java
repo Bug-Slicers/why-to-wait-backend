@@ -8,50 +8,56 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-import java.util.Set;
 import java.util.UUID;
-
-import static jakarta.persistence.FetchType.LAZY;
 
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "merchant")
 public class Merchant {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID Id;
-
-    private String RestaurantName;
+    @GeneratedValue
+    private UUID id;
 
     @NotNull
-    private UUID Address;
+    @Column(nullable = false)
+    private String restaurantName;
 
     @NotNull
-    private UUID Owner;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_id", referencedColumnName = "id", nullable = false)
+    private Address address;
 
     @NotNull
-    private MerchantType MerchantType;
-    private Boolean IsOnline;
-    private Instant CreatedAt;
-    private Instant LastUpdated;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
+    private User owner;
 
-    @OneToMany(fetch = LAZY, mappedBy="MerchantId")
-    Set<Table> Tables;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MerchantType type = MerchantType.DINE_IN;
 
-    @OneToMany(fetch = LAZY, mappedBy="MerchantId")
-    Set<MenuItem> MenuItems;
+    @Column(nullable = false)
+    private Boolean isOnline = false;
 
-    @OneToOne(mappedBy = "MerchantId")
-    Timing Time;
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
 
-    @OneToMany(fetch = LAZY, mappedBy="MerchantId")
-    Set<Qrcode> QrCodes;
+    @Column(nullable = false)
+    private Instant updatedAt;
 
-    @OneToMany(fetch = LAZY, mappedBy="MerchantId")
-    Set<Order> Orders;
+    @PrePersist
+    public void prePersist() {
+        Instant now = Instant.now();
+        createdAt = now;
+        updatedAt = now;
+    }
 
-    @OneToMany(fetch = LAZY, mappedBy="MerchantId")
-    Set<MenuCategory> MenuCategories;
-
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = Instant.now();
+    }
 }
