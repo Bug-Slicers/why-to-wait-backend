@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.3</version>
+        <version>3.3.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -19,7 +19,6 @@
 
     <properties>
         <java.version>22</java.version> <!-- Ensure compatibility with Java 22 -->
-        <changelog.base.dir>src/main/resources/db/changelogs/</changelog.base.dir>
     </properties>
 
     <dependencies>
@@ -85,8 +84,7 @@
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>4.29.2</version>
                 <configuration>
-                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
-                    <outputChangeLogFile>${changelog.base.dir}${outputFileName}</outputChangeLogFile>
+                    <propertyFile>/src/main/resources/liquibase.properties</propertyFile>
                 </configuration>
             </plugin>
 
