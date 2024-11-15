@@ -69,9 +69,9 @@ CREATE TABLE "users" (
   "first_name" varchar NOT NULL,
   "last_name" varchar,
   "email" varchar UNIQUE NOT NULL,
-  "email_verified" bool DEFAULT false,
+  "email_verified" bool NOT NULL DEFAULT false,
   "mobile" varchar UNIQUE NOT NULL,
-  "mobile_verified" bool DEFAULT false,
+  "mobile_verified" bool NOT NULL DEFAULT false,
   "google_id" varchar UNIQUE,
   "role" user_role,
   "last_logout" timestamp,
@@ -95,7 +95,7 @@ CREATE TABLE "merchant" (
   "address" uuid NOT NULL,
   "owner" uuid NOT NULL,
   "type" merchant_type NOT NULL DEFAULT 'DINE_IN',
-  "is_online" bool DEFAULT false,
+  "is_online" bool NOT NULL DEFAULT false,
   "created_at" timestamp,
   "updated_at" timestamp
 );
@@ -117,7 +117,7 @@ CREATE TABLE "timing" (
   "day_of_week" day_of_week NOT NULL,
   "open_time" time,
   "close_time" time,
-  "is_closed" bool DEFAULT false,
+  "is_closed" bool NOT NULL DEFAULT false,
   "created_at" timestamp,
   "updated_at" timestamp
 );
@@ -188,7 +188,7 @@ CREATE TABLE "order" (
   "token" integer,
   "merchant_id" uuid NOT NULL,
   "table_id" uuid,
-  "status" order_status DEFAULT 'ACCEPTED',
+  "status" order_status NOT NULL DEFAULT 'ACCEPTED',
   "total_amount" float,
   "created_at" timestamp,
   "updated_at" timestamp
@@ -203,7 +203,7 @@ CREATE TABLE "order_item" (
   "instruction" varchar,
   "quantity" int,
   "amount" float,
-  "status" order_item_status DEFAULT 'PREPARING',
+  "status" order_item_status NOT NULL DEFAULT 'PREPARING',
   "created_at" timestamp
 );
 --rollback DROP TABLE "order_item";
