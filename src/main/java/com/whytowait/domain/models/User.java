@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -16,10 +18,11 @@ import java.util.UUID;
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "email"),
         @UniqueConstraint(columnNames = "mobile"),
-        @UniqueConstraint(columnNames = "googleId")
+        @UniqueConstraint(columnNames = "google_id")
 })
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class User {
 
     @Id
@@ -37,6 +40,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean emailVerified = false;
 
     @NotNull
@@ -44,13 +48,15 @@ public class User {
     private String mobile;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean mobileVerified = false;
 
     @Column(unique = true)
     private String googleId;
 
     @Enumerated(EnumType.STRING)
-    private UserRole role;
+    @Builder.Default
+    private UserRole role = UserRole.CUSTOMER;
 
     private Instant lastLogout;
 

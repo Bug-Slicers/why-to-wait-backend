@@ -4,6 +4,7 @@ import com.whytowait.domain.models.enums.MerchantRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "merchant_managers")
+@Builder
 public class MerchantManager {
     @Id
     @GeneratedValue

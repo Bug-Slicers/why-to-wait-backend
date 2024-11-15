@@ -4,6 +4,7 @@ import com.whytowait.domain.models.enums.MerchantType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "merchant")
+@Builder
 public class Merchant {
 
     @Id
@@ -38,6 +40,7 @@ public class Merchant {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private MerchantType type = MerchantType.DINE_IN;
 
     @Column(nullable = false)
