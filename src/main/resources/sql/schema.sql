@@ -1,11 +1,16 @@
-CREATE TYPE "UserRole" AS ENUM (
-  'MERCHANT_OPERATOR',
-  'MERCHANT_ADMIN',
-  'CUSTOMERs',
+-- Enum Types
+CREATE TYPE "user_role" AS ENUM (
+  'CUSTOMER',
   'SUPER_ADMIN'
 );
 
-CREATE TYPE "DayOfWeek" AS ENUM (
+CREATE TYPE "merchant_role" AS ENUM (
+  'MERCHANT_ADMIN',
+  'MERCHANT_OPERATOR',
+  'MERCHANT_OWNER'
+);
+
+CREATE TYPE "day_of_week" AS ENUM (
   'MONDAY',
   'TUESDAY',
   'WEDNESDAY',
@@ -15,170 +20,184 @@ CREATE TYPE "DayOfWeek" AS ENUM (
   'SUNDAY'
 );
 
-CREATE TYPE "MerchantType" AS ENUM (
+CREATE TYPE "merchant_type" AS ENUM (
   'DINE_IN',
   'TAKE_AWAY'
 );
 
-CREATE TYPE "ItemTag" AS ENUM (
+CREATE TYPE "item_tag" AS ENUM (
   'VEG',
   'NONVEG',
   'JAIN'
 );
 
-CREATE TYPE "OrderStatus" AS ENUM (
+CREATE TYPE "order_status" AS ENUM (
   'ACCEPTED',
   'PREPARING',
   'COMPLETED'
 );
 
-CREATE TYPE "OrderItemStatus" AS ENUM (
+CREATE TYPE "order_item_status" AS ENUM (
   'PREPARING',
   'SERVED'
 );
 
-CREATE TABLE "Users" (
+-- Tables
+CREATE TABLE "users" (
   "id" uuid PRIMARY KEY,
-  "firstName" varchar2 NOT NULL,
-  "lastName" varchar2,
-  "email" varchar2 UNIQUE NOT NULL,
-  "emailVerified" bool DEFAULT false,
-  "mobile" varchar2 UNIQUE NOT NULL,
-  "mobileVerified" bool DEFAULT false,
-  "googleId" varchar2 UNIQUE,
-  "role" UserRole,
-  "lastLogout" timestamp,
-  "createdAt" timestamp,
-  "updatedAt" timestamp
+  "first_name" varchar NOT NULL,
+  "last_name" varchar,
+  "email" varchar UNIQUE NOT NULL,
+  "email_verified" bool DEFAULT false,
+  "mobile" varchar UNIQUE NOT NULL,
+  "mobile_verified" bool DEFAULT false,
+  "google_id" varchar UNIQUE,
+  "role" "user_role",
+  "last_logout" timestamp,
+  "created_at" timestamp,
+  "updated_at" timestamp
 );
 
-CREATE TABLE "HashedPassword" (
+CREATE TABLE "hashed_password" (
   "id" uuid,
-  "userId" uuid,
-  "hashedPassword" varchar2
+  "user_id" uuid,
+  "hashed_password" varchar
 );
 
-CREATE TABLE "Merchant" (
+CREATE TABLE "merchant" (
   "id" uuid PRIMARY KEY,
-  "restaurantName" varchar2,
+  "restaurant_name" varchar,
   "address" uuid NOT NULL,
   "owner" uuid NOT NULL,
-  "type" MerchantType NOT NULL DEFAULT 'DINE_IN',
-  "isOnline" bool DEFAULT false,
-  "createdAt" timestamp,
-  "updatedAt" timestamp
+  "type" "merchant_type" NOT NULL DEFAULT 'DINE_IN',
+  "is_online" bool DEFAULT false,
+  "created_at" timestamp,
+  "updated_at" timestamp
 );
 
-CREATE TABLE "Timing" (
+CREATE TABLE "merchant_managers" (
   "id" uuid PRIMARY KEY,
-  "merchantId" uuid NOT NULL,
-  "dayOfWeek" DayOfWeek NOT NULL,
-  "openTime" time,
-  "closeTime" time,
-  "isClosed" bool DEFAULT false,
-  "createdAt" timestamp,
-  "updatedAt" timestamp
+  "user_id" uuid NOT NULL,
+  "merchant_id" uuid NOT NULL,
+  "role" "merchant_role"
 );
 
-CREATE TABLE "Address" (
+CREATE TABLE "timing" (
   "id" uuid PRIMARY KEY,
-  "addressLine1" varchar2 NOT NULL,
-  "addressLine2" varchar2,
-  "city" varchar2,
-  "district" varchar2,
-  "state" varchar2,
-  "pincode" varchar2(6),
-  "createdAt" timestamp,
-  "updatedAt" timestamp
+  "merchant_id" uuid NOT NULL,
+  "day_of_week" "day_of_week" NOT NULL,
+  "open_time" time,
+  "close_time" time,
+  "is_closed" bool DEFAULT false,
+  "created_at" timestamp,
+  "updated_at" timestamp
 );
 
-CREATE TABLE "MenuCategory" (
+CREATE TABLE "address" (
   "id" uuid PRIMARY KEY,
-  "name" varchar2 NOT NULL,
-  "merchantId" uuid NOT NULL,
-  "createdAt" timestamp,
-  "updatedAt" timestamp
+  "address_line1" varchar NOT NULL,
+  "address_line2" varchar,
+  "city" varchar,
+  "district" varchar,
+  "state" varchar,
+  "pincode" varchar(6),
+  "created_at" timestamp,
+  "updated_at" timestamp
 );
 
-CREATE TABLE "MenuItem" (
+CREATE TABLE "menu_category" (
   "id" uuid PRIMARY KEY,
-  "merchantId" uuid NOT NULL,
-  "name" varchar2 NOT NULL,
-  "description" varchar2,
+  "name" varchar NOT NULL,
+  "merchant_id" uuid NOT NULL,
+  "created_at" timestamp,
+  "updated_at" timestamp
+);
+
+CREATE TABLE "menu_item" (
+  "id" uuid PRIMARY KEY,
+  "merchant_id" uuid NOT NULL,
+  "name" varchar NOT NULL,
+  "description" varchar,
   "category" uuid NOT NULL,
-  "tag" ItemTag NOT NULL,
+  "tag" "item_tag" NOT NULL,
   "price" float NOT NULL,
-  "imageUrl" varchar2,
-  "createdAt" timestamp,
-  "updatedAt" timestamp
+  "image_url" varchar,
+  "created_at" timestamp,
+  "updated_at" timestamp
 );
 
-CREATE TABLE "Table" (
+CREATE TABLE "merchant_table" (
   "id" uuid PRIMARY KEY,
-  "merchantId" uuid NOT NULL,
-  "tableNumber" int NOT NULL,
-  "createdAt" timestamp,
-  "updatedAt" timestamp
+  "merchant_id" uuid NOT NULL,
+  "table_number" int NOT NULL,
+  "created_at" timestamp,
+  "updated_at" timestamp
 );
 
-CREATE TABLE "QrCode" (
+CREATE TABLE "qr_code" (
   "id" uuid PRIMARY KEY,
-  "tableId" uuid,
-  "merchantId" uuid NOT NULL,
-  "createdAt" timestamp,
-  "updatedAt" timestamp
+  "table_id" uuid,
+  "merchant_id" uuid NOT NULL,
+  "created_at" timestamp,
+  "updated_at" timestamp
 );
 
-CREATE TABLE "Order" (
+CREATE TABLE "order" (
   "id" uuid PRIMARY KEY,
   "token" integer,
-  "merchantId" uuid NOT NULL,
-  "tableId" uuid,
-  "status" OrderStatus DEFAULT 'ACCEPTED',
-  "totalAmout" float,
-  "createdAt" timestamp,
-  "updatedAt" timestamp
+  "merchant_id" uuid NOT NULL,
+  "table_id" uuid,
+  "status" "order_status" DEFAULT 'ACCEPTED',
+  "total_amount" float,
+  "created_at" timestamp,
+  "updated_at" timestamp
 );
 
-CREATE TABLE "OrderItem" (
+CREATE TABLE "order_item" (
   "id" uuid PRIMARY KEY,
-  "itemId" uuid NOT NULL,
-  "orderId" uuid NOT NULL,
-  "instruction" varchar2,
+  "item_id" uuid NOT NULL,
+  "order_id" uuid NOT NULL,
+  "instruction" varchar,
   "quantity" int,
   "amount" float,
-  "status" OrderItemStatus DEFAULT 'PREPARING',
-  "createdAt" timestamp
+  "status" "order_item_status" DEFAULT 'PREPARING',
+  "created_at" timestamp
 );
 
-CREATE UNIQUE INDEX ON "Timing" ("merchantId", "dayOfWeek");
+-- Indexes
+CREATE UNIQUE INDEX ON "timing" ("merchant_id", "day_of_week");
 
-CREATE UNIQUE INDEX ON "Table" ("merchantId", "tableNumber");
+CREATE UNIQUE INDEX ON "merchant_table" ("merchant_id", "table_number");
 
-ALTER TABLE "HashedPassword" ADD FOREIGN KEY ("userId") REFERENCES "Users" ("id");
+-- Foreign Keys
+ALTER TABLE "hashed_password" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "Merchant" ADD FOREIGN KEY ("address") REFERENCES "Address" ("id");
+ALTER TABLE "merchant" ADD FOREIGN KEY ("address") REFERENCES "address" ("id");
 
-ALTER TABLE "Merchant" ADD FOREIGN KEY ("owner") REFERENCES "Users" ("id");
+ALTER TABLE "merchant" ADD FOREIGN KEY ("owner") REFERENCES "users" ("id");
 
-ALTER TABLE "Timing" ADD FOREIGN KEY ("merchantId") REFERENCES "Merchant" ("id");
+ALTER TABLE "merchant_managers" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "MenuCategory" ADD FOREIGN KEY ("merchantId") REFERENCES "Merchant" ("id");
+ALTER TABLE "merchant_managers" ADD FOREIGN KEY ("merchant_id") REFERENCES "merchant" ("id");
 
-ALTER TABLE "MenuItem" ADD FOREIGN KEY ("merchantId") REFERENCES "Merchant" ("id");
+ALTER TABLE "timing" ADD FOREIGN KEY ("merchant_id") REFERENCES "merchant" ("id");
 
-ALTER TABLE "MenuItem" ADD FOREIGN KEY ("category") REFERENCES "MenuCategory" ("id");
+ALTER TABLE "menu_category" ADD FOREIGN KEY ("merchant_id") REFERENCES "merchant" ("id");
 
-ALTER TABLE "Table" ADD FOREIGN KEY ("merchantId") REFERENCES "Merchant" ("id");
+ALTER TABLE "menu_item" ADD FOREIGN KEY ("merchant_id") REFERENCES "merchant" ("id");
 
-ALTER TABLE "QrCode" ADD FOREIGN KEY ("tableId") REFERENCES "Table" ("id");
+ALTER TABLE "menu_item" ADD FOREIGN KEY ("category") REFERENCES "menu_category" ("id");
 
-ALTER TABLE "QrCode" ADD FOREIGN KEY ("merchantId") REFERENCES "Merchant" ("id");
+ALTER TABLE "merchant_table" ADD FOREIGN KEY ("merchant_id") REFERENCES "merchant" ("id");
 
-ALTER TABLE "Order" ADD FOREIGN KEY ("merchantId") REFERENCES "Merchant" ("id");
+ALTER TABLE "qr_code" ADD FOREIGN KEY ("table_id") REFERENCES "merchant_table" ("id");
 
-ALTER TABLE "Order" ADD FOREIGN KEY ("tableId") REFERENCES "Table" ("id");
+ALTER TABLE "qr_code" ADD FOREIGN KEY ("merchant_id") REFERENCES "merchant" ("id");
 
-ALTER TABLE "OrderItem" ADD FOREIGN KEY ("itemId") REFERENCES "MenuItem" ("id");
+ALTER TABLE "order" ADD FOREIGN KEY ("merchant_id") REFERENCES "merchant" ("id");
 
-ALTER TABLE "OrderItem" ADD FOREIGN KEY ("orderId") REFERENCES "Order" ("id");
+ALTER TABLE "order" ADD FOREIGN KEY ("table_id") REFERENCES "merchant_table" ("id");
+
+ALTER TABLE "order_item" ADD FOREIGN KEY ("item_id") REFERENCES "menu_item" ("id");
+
+ALTER TABLE "order_item" ADD FOREIGN KEY ("order_id") REFERENCES "order" ("id");
