@@ -1,6 +1,6 @@
 package com.whytowait.domain.models;
 
-import com.whytowait.domain.models.Enums.OrderStatus;
+import com.whytowait.domain.models.enums.OrderStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

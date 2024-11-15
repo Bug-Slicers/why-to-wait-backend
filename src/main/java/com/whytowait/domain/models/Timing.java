@@ -1,6 +1,6 @@
 package com.whytowait.domain.models;
 
-import com.whytowait.domain.models.Enums.DayOfWeek;
+import com.whytowait.domain.models.enums.DayOfWeek;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;

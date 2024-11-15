@@ -1,6 +1,6 @@
 package com.whytowait.domain.models;
 
-import com.whytowait.domain.models.Enums.UserRole;
+import com.whytowait.domain.models.enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
