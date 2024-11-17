@@ -1,5 +1,6 @@
 package com.whytowait.api.v1.controllers;
 
+import com.whytowait.api.common.exceptions.BadRequestException;
 import com.whytowait.api.common.responses.SuccessResponse;
 import com.whytowait.api.v1.services.UserService;
 import com.whytowait.domain.dto.user.UserRegistrationDTO;
@@ -16,14 +17,9 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @GetMapping
-    public String Hello() {
-        return "hello";
-    }
-
     @PostMapping
-    public SuccessResponse<UserRegistrationResponseDTO> registerUser(@Valid @RequestBody UserRegistrationDTO requesstBody){
-        User user = UserRegistrationDTO.toUser(requesstBody);
+    public SuccessResponse<UserRegistrationResponseDTO> registerUser(@Valid @RequestBody UserRegistrationDTO requestBody) throws BadRequestException {
+        User user = UserRegistrationDTO.toUser(requestBody);
         String password = requesstBody.getPassword();
         User createdUser = userService.createUser(user, password);
         UserRegistrationResponseDTO response = UserRegistrationResponseDTO.fromUser(createdUser);
