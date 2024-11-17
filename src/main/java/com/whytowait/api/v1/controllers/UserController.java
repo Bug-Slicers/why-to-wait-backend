@@ -20,7 +20,7 @@ public class UserController {
     @PostMapping
     public SuccessResponse<UserRegistrationResponseDTO> registerUser(@Valid @RequestBody UserRegistrationDTO requestBody) throws BadRequestException {
         User user = UserRegistrationDTO.toUser(requestBody);
-        String password = requesstBody.getPassword();
+        String password = requestBody.getPassword();
         User createdUser = userService.createUser(user, password);
         UserRegistrationResponseDTO response = UserRegistrationResponseDTO.fromUser(createdUser);
         return new SuccessResponse<UserRegistrationResponseDTO>("User registered successfully", response);
