@@ -1,9 +1,10 @@
 package com.whytowait.domain.models;
 
-import com.whytowait.domain.models.Enums.ItemTag;
+import com.whytowait.domain.models.enums.ItemTag;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "menu_item")
+@Builder
 public class MenuItem {
 
     @Id

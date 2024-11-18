@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Builder;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @Table(name = "merchant_table", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"merchant_id", "tableNumber"})
 })
+@Builder
 public class MerchantTable {
 
     @Id

@@ -1,10 +1,11 @@
 package com.whytowait.domain.models;
 
-import com.whytowait.domain.models.Enums.DayOfWeek;
+import com.whytowait.domain.models.enums.DayOfWeek;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,6 +20,7 @@ import java.util.UUID;
 @Table(name = "timing", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"merchant_id", "dayOfWeek"})
 })
+@Builder
 public class Timing {
 
     @Id
@@ -41,6 +43,7 @@ public class Timing {
     private LocalTime closeTime;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean isClosed = false;
 
     @Column(nullable = false, updatable = false)
