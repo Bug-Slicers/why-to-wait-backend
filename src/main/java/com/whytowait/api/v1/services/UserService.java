@@ -6,6 +6,7 @@ import com.whytowait.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -16,6 +17,7 @@ public class UserService {
     @Autowired
     HashedPasswordService hashedPasswordService;
 
+    @Transactional
     public User createUser(User user, String password) throws BadRequestException {
         try {
             User createdUser = userRepository.save(user);
