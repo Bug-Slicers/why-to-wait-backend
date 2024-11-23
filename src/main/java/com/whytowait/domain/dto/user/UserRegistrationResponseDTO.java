@@ -15,6 +15,7 @@ public class UserRegistrationResponseDTO {
     private String lastName;
     private String email;
     private String mobile;
+    private String token;
 
     public static UserRegistrationResponseDTO fromUser(User user) {
         return UserRegistrationResponseDTO.builder()

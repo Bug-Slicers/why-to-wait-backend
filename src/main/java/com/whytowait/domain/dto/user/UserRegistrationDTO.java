@@ -43,7 +43,7 @@ public class UserRegistrationDTO {
                 .firstName(data.getFirstName())
                 .lastName(data.getLastName())
                 .email(data.getEmail())
-                .mobile(data.getEmail())
+                .mobile(data.getMobile())
                 .build();
     }
 }
