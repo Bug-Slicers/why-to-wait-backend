@@ -1,6 +1,7 @@
 package com.whytowait.api.v1.services;
 
 import com.whytowait.api.common.exceptions.BadRequestException;
+import com.whytowait.api.common.exceptions.UnauthorizedException;
 import com.whytowait.domain.dto.user.UserLoginReqDTO;
 import com.whytowait.domain.dto.user.UserLoginResDTO;
 import com.whytowait.domain.dto.user.UserRegistrationResponseDTO;
@@ -33,12 +34,12 @@ public class UserService {
         return userResponse;
     }
 
-    public UserLoginResDTO loginUser(UserLoginReqDTO userLoginDTO) throws BadRequestException {
+    public UserLoginResDTO loginUser(UserLoginReqDTO userLoginDTO) throws BadRequestException, UnauthorizedException {
         UserLoginResDTO response = new UserLoginResDTO();
         User user = userRepository.findByMobile(userLoginDTO.getMobile());
 
         if (user == null) {
-            throw new BadRequestException("Invalid Credentials");
+            throw new UnauthorizedException("Invalid Credentials");
         }
 
         if (hashedPasswordService.checkPassword(user.getId(), userLoginDTO.getPassword())) {
@@ -47,7 +48,7 @@ public class UserService {
             response.setUsername(userLoginDTO.getMobile());
             return response;
         } else {
-            throw new BadRequestException("Invalid Credentials");
+            throw new UnauthorizedException("Invalid Credentials");
         }
     }
 
@@ -60,10 +61,10 @@ public class UserService {
     }
 
     @Transactional
-    public String logoutUser(String username) throws BadRequestException{
-        Integer updateStatus =userRepository.updateLastLogoutTimestamp(username);
-        if(updateStatus==1){
-            return  "Logout Successful";
+    public String logoutUser(String mobile) {
+        Integer updateStatus = userRepository.updateLastLogoutTimestamp(mobile);
+        if (updateStatus == 1) {
+            return "Logout Successful";
         }
         return "Logout Failed";
     }

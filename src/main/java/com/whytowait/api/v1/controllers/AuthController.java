@@ -1,16 +1,17 @@
 package com.whytowait.api.v1.controllers;
 
+import com.whytowait.api.common.exceptions.AccessTokenException;
 import com.whytowait.api.common.exceptions.BadRequestException;
+import com.whytowait.api.common.exceptions.UnauthorizedException;
 import com.whytowait.api.common.responses.SuccessResponse;
 import com.whytowait.api.v1.services.UserService;
-import com.whytowait.domain.dto.user.UserLoginReqDTO;
-import com.whytowait.domain.dto.user.UserLoginResDTO;
-import com.whytowait.domain.dto.user.UserRegistrationDTO;
-import com.whytowait.domain.dto.user.UserRegistrationResponseDTO;
+import com.whytowait.domain.dto.user.*;
 import com.whytowait.domain.models.User;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,36 +34,16 @@ public class AuthController {
     }
 
     @PostMapping(path = "/login")
-    public SuccessResponse<UserLoginResDTO> loginUser(@RequestBody UserLoginReqDTO userLoginDTO) throws BadRequestException {
+    public SuccessResponse<UserLoginResDTO> loginUser(@RequestBody UserLoginReqDTO userLoginDTO) throws BadRequestException, UnauthorizedException {
         UserLoginResDTO response = userService.loginUser(userLoginDTO);
-        return new SuccessResponse<UserLoginResDTO>("User Loggedin Success", response);
-    }
-
-    @GetMapping
-    public String getString() {
-        return "hii";
+        return new SuccessResponse<UserLoginResDTO>("User Logged in Success", response);
     }
 
     @PostMapping(path = "/logout")
-    public SuccessResponse<String> logoutUser(@RequestHeader("Authorization") String authorizationHeader) throws BadRequestException{
-
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new BadRequestException("Invalid or missing Authorization header");
-        }
-
-        // Extract the token from the Authorization header
-        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
-        // Use JwtService to extract the username
-        String username;
-        try {
-            username = jwtService.extractUserName(token);
-            System.out.println("username :"+username);
-        } catch (Exception e) {
-            throw new BadRequestException("Invalid JWT token");
-        }
-
-        String respone = userService.logoutUser(username);
-        return new SuccessResponse<String>("User Logout Success",respone);
-
+    public SuccessResponse<String> logoutUser() throws AccessTokenException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsDTO userDetails = (UserDetailsDTO) authentication.getPrincipal();
+        String response = userService.logoutUser(userDetails.getMobile());
+        return new SuccessResponse<String>("User Logout Success", response);
     }
 }

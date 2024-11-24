@@ -1,9 +1,14 @@
 package com.whytowait.config;
 
+import com.whytowait.api.common.exceptions.AccessTokenException;
+import com.whytowait.api.common.exceptions.ApiException;
+import com.whytowait.api.common.responses.ApiResponse;
 import com.whytowait.api.v1.services.JwtService;
 import com.whytowait.api.v1.services.UserService;
 import com.whytowait.domain.dto.user.UserDetailsDTO;
 import com.whytowait.domain.models.User;
+import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -17,9 +22,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
 import java.io.IOException;
+import java.util.List;
 
+@Slf4j
 @Component
 public class JwtFilter extends OncePerRequestFilter {
+
+    static final List<String> PUBLIC_ENDPOINTS = List.of(
+            "/auth/login",
+            "/auth/signup"
+    );
 
     @Autowired
     private JwtService jwtService;
@@ -29,27 +41,42 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-//  Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJraWxsIiwiaWF0IjoxNzIzMTgzNzExLCJleHAiOjE3MjMxODM4MTl9.5nf7dRzKRiuGurN2B9dHh_M5xiu73ZzWPr6rbhOTTHs
-        String authHeader = request.getHeader("Authorization");
-        String token = null;
-        String username = null;
+        try {
+            String requestUri = request.getRequestURI();
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-            username = jwtService.extractUserName(token);
-        }
+            if (isPublicEndpoint(requestUri)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            String authHeader = request.getHeader("Authorization");
+
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                throw new AccessTokenException("Invalid or missing Authorization header");
+            }
+
+            String token = authHeader.substring(7);
+
+            Claims claims = jwtService.validateTokenAndGetClaims(token);
+            String username = claims.getSubject();
             User user = userService.loadUserByUsername(username);
             UserDetailsDTO userDetails = UserDetailsDTO.fromUser(user);
-            if (jwtService.validateToken(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, null);
-                authToken.setDetails(new WebAuthenticationDetailsSource()
-                        .buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, null);
+            authToken.setDetails(new WebAuthenticationDetailsSource()
+                    .buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+        } catch (ApiException ex) {
+            System.out.println(ex);
+            ApiResponse res = ApiException.handle(ex);
+            res.writeToResponse(response);
+            return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isPublicEndpoint(String requestUri) {
+        return PUBLIC_ENDPOINTS.contains(requestUri);
     }
 }

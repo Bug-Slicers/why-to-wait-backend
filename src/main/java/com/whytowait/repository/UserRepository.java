@@ -7,7 +7,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -16,9 +19,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Modifying
     @Query(nativeQuery = true, value = "update users set last_logout=current_timestamp where mobile=:mobile")
-    Integer updateLastLogoutTimestamp(@Param("mobile") String mobile);
+    Integer updateLastLogoutTimestamp(String mobile);
 
-    @Query(nativeQuery = true, value = "select last_logout from users where id = :userId")
-    Timestamp findLastLogoutById(@Param("userId") UUID userId);
-
+    @Query(nativeQuery = true, value = "select last_logout from users where mobile=:mobile")
+    Date findLastLogoutByMobile(String mobile);
 }

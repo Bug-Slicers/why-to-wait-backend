@@ -13,6 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class UserDetailsDTO {
+    private UUID id;
     private String firstName;
     private String lastName;
     private String email;
@@ -20,6 +21,7 @@ public class UserDetailsDTO {
 
     public static UserDetailsDTO fromUser(User user) {
         return UserDetailsDTO.builder()
+                .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())

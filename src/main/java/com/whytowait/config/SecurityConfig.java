@@ -10,21 +10,24 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
     @Autowired
     private JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.
-                csrf(AbstractHttpConfigurer::disable).
-                authorizeHttpRequests(request -> request.requestMatchers("/auth/signup","/auth/login").permitAll().anyRequest().authenticated()).
-                sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).
-                addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers(JwtFilter.PUBLIC_ENDPOINTS.toArray(String[]::new)).permitAll()
+                        .anyRequest().authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return  http.build();
+        return http.build();
     }
 }
