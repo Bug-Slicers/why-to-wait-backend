@@ -1,20 +1,21 @@
 package com.whytowait.api.v1.services;
 
+import com.whytowait.api.common.exceptions.AccessTokenException;
+import com.whytowait.api.common.exceptions.BadTokenException;
+import com.whytowait.api.common.exceptions.TokenExpiredException;
 import com.whytowait.domain.dto.user.UserDetailsDTO;
 import com.whytowait.repository.UserRepository;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jdk.jfr.DataAmount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 import java.util.function.Function;
 
 
@@ -29,13 +30,17 @@ JwtService {
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
+
+        Date now = new Date();
+        Date expiration = new Date(System.currentTimeMillis() + 15 * 60 * 1000);
+
         return Jwts.
                 builder().
                 claims().
                 add(claims).
                 subject(username).
-                issuedAt(new Date(System.currentTimeMillis())).
-                expiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000)).
+                issuedAt(now).
+                expiration(expiration).
                 and().
                 signWith(generateKey()).
                 compact();
@@ -46,50 +51,27 @@ JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public Claims validateTokenAndGetClaims(String token) throws TokenExpiredException, BadTokenException, AccessTokenException {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(generateKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
 
-    public String extractUserName(String token) {
-        // extract the username from jwt token
-        return extractClaim(token, Claims::getSubject);
-    }
+            String username = claims.getSubject();
 
-    private <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimResolver.apply(claims);
-    }
+            Date lastLogout = userRepository.findLastLogoutByMobile(username);
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(generateKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-    }
-
-    public boolean validateToken(String token, UserDetailsDTO userDetails) {
-        final String userName = extractUserName(token);
-        UUID userId = userDetails.getId();
-
-        return (userName.equals(userDetails.getMobile()) && !isTokenExpired(token, userId));
-    }
-
-    private boolean isTokenExpired(String token, UUID userId) {
-        Timestamp lastLogout = userRepository.findLastLogoutById(userId);
-
-        if (lastLogout != null) {
-            // Compare last_logout with token issue time
-            Date tokenIssuedAt = extractIssuedAt(token);
-            if (tokenIssuedAt.before(lastLogout)) {
-                return true; // Token was issued before the last logout
+            if (lastLogout != null && claims.getIssuedAt().before(lastLogout)) {
+                throw new BadTokenException();
             }
+
+            return claims;
+        } catch (ExpiredJwtException ex) {
+            throw new TokenExpiredException();
+        } catch (JwtException ex) {
+            throw new AccessTokenException();
         }
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
-
-    private Date extractIssuedAt(String token) {
-        return extractClaim(token, Claims::getIssuedAt);
     }
 }
