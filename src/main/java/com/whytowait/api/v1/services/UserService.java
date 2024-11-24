@@ -70,4 +70,13 @@ public class UserService {
         }
 
     }
+
+    @Transactional
+    public String logoutUser(String username) throws BadRequestException{
+        Integer updateStatus =userRepository.updateLastLogoutTimestamp(username);
+        if(updateStatus==1){
+            return  "Logout Successful";
+        }
+        return "Logout Failed";
+    }
 }
