@@ -1,6 +1,6 @@
 package com.whytowait.api.v1.services;
 
-import com.whytowait.domain.dto.user.FetchUserDTO;
+import com.whytowait.domain.dto.user.UserDetailsDTO;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.io.Decoders;
@@ -15,7 +15,8 @@ import java.util.function.Function;
 
 
 @Service
-public class JwtService {
+public class
+JwtService {
 
     private static final String SECRET_KEY = "YourBase64EncodedSecretKeyHere1234567890123456"; // Replace with a valid base64-encoded key
 
@@ -27,7 +28,7 @@ public class JwtService {
                 add(claims).
                 subject(username).
                 issuedAt(new Date(System.currentTimeMillis())).
-                expiration(new Date(System.currentTimeMillis()+ 60 * 60 * 1000)).
+                expiration(new Date(System.currentTimeMillis()+ 15 * 60 * 1000)).
                 and().
                 signWith(generateKey()).
                 compact();
@@ -57,7 +58,7 @@ public class JwtService {
                 .getPayload();
     }
 
-    public boolean validateToken(String token, FetchUserDTO userDetails) {
+    public boolean validateToken(String token, UserDetailsDTO userDetails) {
         final String userName = extractUserName(token);
         return (userName.equals(userDetails.getMobile()) && !isTokenExpired(token));
     }

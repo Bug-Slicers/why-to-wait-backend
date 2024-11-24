@@ -1,8 +1,9 @@
 package com.whytowait.config;
 
 import com.whytowait.api.v1.services.JwtService;
-import com.whytowait.api.v1.services.MyUserDetailService;
-import com.whytowait.domain.dto.user.FetchUserDTO;
+import com.whytowait.api.v1.services.UserService;
+import com.whytowait.domain.dto.user.UserDetailsDTO;
+import com.whytowait.domain.models.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -11,7 +12,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -25,7 +25,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtService jwtService;
 
     @Autowired
-    ApplicationContext context;
+    UserService userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -40,7 +40,8 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            FetchUserDTO userDetails =context.getBean(MyUserDetailService.class).loadUserByUsername(username);
+            User user = userService.loadUserByUsername(username);
+            UserDetailsDTO userDetails = UserDetailsDTO.fromUser(user);
             if (jwtService.validateToken(token, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, null);
                 authToken.setDetails(new WebAuthenticationDetailsSource()

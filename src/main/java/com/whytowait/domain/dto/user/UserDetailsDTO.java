@@ -1,26 +1,25 @@
 package com.whytowait.domain.dto.user;
 
-import com.whytowait.api.v1.services.JwtService;
 import com.whytowait.domain.models.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserRegistrationResponseDTO {
+public class UserDetailsDTO {
     private String firstName;
     private String lastName;
     private String email;
     private String mobile;
-    private String token;
 
-    public static UserRegistrationResponseDTO fromUser(User user) {
-        return UserRegistrationResponseDTO.builder()
+    public static UserDetailsDTO fromUser(User user) {
+        return UserDetailsDTO.builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())

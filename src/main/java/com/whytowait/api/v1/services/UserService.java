@@ -3,16 +3,14 @@ package com.whytowait.api.v1.services;
 import com.whytowait.api.common.exceptions.BadRequestException;
 import com.whytowait.domain.dto.user.UserLoginReqDTO;
 import com.whytowait.domain.dto.user.UserLoginResDTO;
+import com.whytowait.domain.dto.user.UserRegistrationResponseDTO;
 import com.whytowait.domain.models.User;
-import com.whytowait.repository.HashedPasswordRepository;
 import com.whytowait.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 public class UserService {
@@ -21,53 +19,43 @@ public class UserService {
     UserRepository userRepository;
 
     @Autowired
-    HashedPasswordRepository hashedPasswordRepository;
-
-    @Autowired
     HashedPasswordService hashedPasswordService;
 
     @Autowired
     JwtService jwtService;
 
-    BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
-
-
-    @Transactional
-    public User createUser(User user, String password) throws BadRequestException {
-        try {
-            User createdUser = userRepository.save(user);
-            hashedPasswordService.createHashedPassword(createdUser, password);
-            return createdUser;
-        } catch (DataIntegrityViolationException ex){
-            throw new BadRequestException("User already exists");
-        }
-
+    @Transactional(rollbackFor = {DataIntegrityViolationException.class})
+    public UserRegistrationResponseDTO createUser(User user, String password) throws DataIntegrityViolationException {
+        User createdUser = userRepository.save(user);
+        hashedPasswordService.createHashedPassword(createdUser, password);
+        UserRegistrationResponseDTO userResponse = UserRegistrationResponseDTO.fromUser(createdUser);
+        userResponse.setToken(jwtService.generateToken(createdUser.getMobile()));
+        return userResponse;
     }
 
-    public UserLoginResDTO loginUser(UserLoginReqDTO userLoginDTO) throws BadRequestException{
+    public UserLoginResDTO loginUser(UserLoginReqDTO userLoginDTO) throws BadRequestException {
+        UserLoginResDTO response = new UserLoginResDTO();
+        User user = userRepository.findByMobile(userLoginDTO.getMobile());
 
-        UserLoginResDTO respone = new UserLoginResDTO();
-        UUID userId;
-        userId = userRepository.findUserByMobile(userLoginDTO.getMobile());
-        if(userId==null){
+        if (user == null) {
             throw new BadRequestException("Invalid Credentials");
         }
 
-        try{
-            String dbUserPassword= hashedPasswordRepository.findPasswordByUserId(userId);
-            if(bcrypt.matches(userLoginDTO.getPassword(),dbUserPassword)){
-                String token = jwtService.generateToken(userLoginDTO.getMobile());
-                respone.setToken(token);
-                respone.setUsername(userLoginDTO.getMobile());
-                return  respone;
-            }
-            else{
-                throw new BadRequestException("Invalid Credentials");
-            }
-        }
-        catch (DataIntegrityViolationException ex){
+        if (hashedPasswordService.checkPassword(user.getId(), userLoginDTO.getPassword())) {
+            String token = jwtService.generateToken(userLoginDTO.getMobile());
+            response.setToken(token);
+            response.setUsername(userLoginDTO.getMobile());
+            return response;
+        } else {
             throw new BadRequestException("Invalid Credentials");
         }
+    }
 
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByMobile(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        return user;
     }
 }

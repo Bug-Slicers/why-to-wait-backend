@@ -10,6 +10,5 @@ import java.util.UUID;
 
 @Repository
 public interface HashedPasswordRepository extends JpaRepository<HashedPassword, UUID> {
-    @Query(nativeQuery = true,value = "select hashed_password from hashed_password where user_id=:userId")
-    String findPasswordByUserId(@Param("userId") UUID userId);
+    HashedPassword findByUserId(UUID userId);
 }
