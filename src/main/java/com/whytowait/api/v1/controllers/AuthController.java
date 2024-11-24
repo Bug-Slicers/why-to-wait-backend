@@ -42,4 +42,27 @@ public class AuthController {
     public String getString() {
         return "hii";
     }
+
+    @PostMapping(path = "/logout")
+    public SuccessResponse<String> logoutUser(@RequestHeader("Authorization") String authorizationHeader) throws BadRequestException{
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new BadRequestException("Invalid or missing Authorization header");
+        }
+
+        // Extract the token from the Authorization header
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        // Use JwtService to extract the username
+        String username;
+        try {
+            username = jwtService.extractUserName(token);
+            System.out.println("username :"+username);
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid JWT token");
+        }
+
+        String respone = userService.logoutUser(username);
+        return new SuccessResponse<String>("User Logout Success",respone);
+
+    }
 }
