@@ -5,13 +5,17 @@ import com.whytowait.api.common.exceptions.UnauthorizedException;
 import com.whytowait.domain.dto.user.UserLoginReqDTO;
 import com.whytowait.domain.dto.user.UserLoginResDTO;
 import com.whytowait.domain.dto.user.UserRegistrationResponseDTO;
+import com.whytowait.domain.models.MerchantManager;
 import com.whytowait.domain.models.User;
+import com.whytowait.repository.MerchantManagerRepository;
 import com.whytowait.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -25,12 +29,15 @@ public class UserService {
     @Autowired
     JwtService jwtService;
 
+    @Autowired
+    MerchantManagerRepository merchantManagerRepository;
+
     @Transactional(rollbackFor = {DataIntegrityViolationException.class})
     public UserRegistrationResponseDTO createUser(User user, String password) throws DataIntegrityViolationException {
         User createdUser = userRepository.save(user);
         hashedPasswordService.createHashedPassword(createdUser, password);
         UserRegistrationResponseDTO userResponse = UserRegistrationResponseDTO.fromUser(createdUser);
-        userResponse.setToken(jwtService.generateToken(createdUser.getMobile()));
+        userResponse.setToken(jwtService.generateToken(createdUser.getMobile(), createdUser.getRole().name(), null));
         userResponse.setRefreshToken(jwtService.generateRefreshToken(createdUser.getMobile()));
         return userResponse;
     }
@@ -39,12 +46,14 @@ public class UserService {
         UserLoginResDTO response = new UserLoginResDTO();
         User user = userRepository.findByMobile(userLoginDTO.getMobile());
 
+        List<MerchantManager> merchantRoles = merchantManagerRepository.findByUserId(user.getId());
+
         if (user == null) {
             throw new UnauthorizedException("Invalid Credentials");
         }
 
         if (hashedPasswordService.checkPassword(user.getId(), userLoginDTO.getPassword())) {
-            String token = jwtService.generateToken(user.getMobile());
+            String token = jwtService.generateToken(user.getMobile(), user.getRole().name(), merchantRoles);
             String refreshToken = jwtService.generateRefreshToken(user.getMobile());
             response.setToken(token);
             response.setRefreshToken(refreshToken);

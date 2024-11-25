@@ -7,6 +7,9 @@ import com.whytowait.api.common.exceptions.TokenExpiredException;
 import com.whytowait.domain.dto.user.UserDetailsDTO;
 import com.whytowait.domain.dto.user.UserLoginReqDTO;
 import com.whytowait.domain.dto.user.UserLoginResDTO;
+import com.whytowait.domain.models.MerchantManager;
+import com.whytowait.domain.models.User;
+import com.whytowait.repository.MerchantManagerRepository;
 import com.whytowait.repository.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -20,6 +23,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -28,6 +32,9 @@ JwtService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    MerchantManagerRepository merchantManagerRepository;
 
     private static final String SECRET_KEY = "YourBase64EncodedSecretKeyHere1234567890123456"; // Replace with a valid base64-encoded key
 
@@ -46,8 +53,13 @@ JwtService {
                 compact();
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, String role, List<MerchantManager> merchantRoles) {
         Map<String, Object> claims = new HashMap<>();
+
+        claims.put("roles", List.of(role));
+        claims.put("merchant_roles", merchantRoles.stream()
+                .map(merchantRole -> Map.of("merchant_id", merchantRole.getMerchantId(), "role", merchantRole.getRole()))
+                .collect(Collectors.toList()));
 
         Date now = new Date();
         Date expiration = new Date(System.currentTimeMillis() + 15 * 60 * 1000);
@@ -123,7 +135,10 @@ JwtService {
 
     public UserLoginResDTO validateRefreshTokenAndGenerateAccessTokenAndRefreshToken(String token) throws TokenExpiredException, AccessTokenException, BadTokenException {
         Claims claims = validateRefreshTokenAndGetClaims(token);
-        String generatedToken = generateToken(claims.getSubject());
+        User user = userRepository.findByMobile(claims.getSubject());
+        List<MerchantManager> merchantRoles = merchantManagerRepository.findByUserId(user.getId());
+
+        String generatedToken = generateToken(claims.getSubject(), user.getRole().name(), merchantRoles);
         String generateRefreshToken = generateRefreshToken(claims.getSubject());
         return UserLoginResDTO.builder()
                 .token(generatedToken)
