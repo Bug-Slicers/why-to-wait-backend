@@ -18,8 +18,8 @@ public class UserRepositoryTests {
     @Test
     public void testUserCreation(){
         User testUser = User.builder().firstName("Test").lastName("User").email("testuser@test.com").mobile("+919822451252").role(UserRole.CUSTOMER).build();
-        System.out.println(testUser);
         User testUserFromRepository = userRepository.save(testUser);
         Assertions.assertNotNull(testUserFromRepository);
+        userRepository.deleteById(testUserFromRepository.getId());
     }
 }

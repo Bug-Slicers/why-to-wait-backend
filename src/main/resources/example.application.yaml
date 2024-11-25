@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: "" # Placeholder for database URL
+    username: "" # Placeholder for database username
+    password: "" # Placeholder for database password
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: com.whytowait.config.SnakeCaseNamingStrategy
+    show-sql: true
+  liquibase:
+    change-log: changelog-master.yaml
+
+jwt:
+  secret_key: "yourVerySecretKeyKeepItLong"
+  refresh_token_secret_key: "yourVeryVerySecretKeyForRefreshTokenKeepItLong"
