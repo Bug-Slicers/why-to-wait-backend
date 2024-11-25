@@ -1,12 +1,12 @@
 package com.whytowait.api.v1.controllers;
 
-import com.whytowait.api.common.exceptions.AccessTokenException;
-import com.whytowait.api.common.exceptions.BadRequestException;
-import com.whytowait.api.common.exceptions.UnauthorizedException;
+import com.whytowait.api.common.exceptions.*;
 import com.whytowait.api.common.responses.SuccessResponse;
+import com.whytowait.api.v1.services.JwtService;
 import com.whytowait.api.v1.services.UserService;
 import com.whytowait.domain.dto.user.*;
 import com.whytowait.domain.models.User;
+import io.jsonwebtoken.Claims;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,6 +21,9 @@ public class AuthController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    JwtService jwtService;
+
     @PostMapping(path = "/signup")
     public SuccessResponse<UserRegistrationResponseDTO> registerUser(@Valid @RequestBody UserRegistrationDTO requestBody) throws BadRequestException {
         try {
@@ -34,7 +37,7 @@ public class AuthController {
     }
 
     @PostMapping(path = "/login")
-    public SuccessResponse<UserLoginResDTO> loginUser(@RequestBody UserLoginReqDTO userLoginDTO) throws BadRequestException, UnauthorizedException {
+    public SuccessResponse<UserLoginResDTO> loginUser(@Valid @RequestBody UserLoginReqDTO userLoginDTO) throws BadRequestException, UnauthorizedException {
         UserLoginResDTO response = userService.loginUser(userLoginDTO);
         return new SuccessResponse<UserLoginResDTO>("User Logged in Success", response);
     }
@@ -45,5 +48,11 @@ public class AuthController {
         UserDetailsDTO userDetails = (UserDetailsDTO) authentication.getPrincipal();
         String response = userService.logoutUser(userDetails.getMobile());
         return new SuccessResponse<String>("User Logout Success", response);
+    }
+
+    @PostMapping(path = "/refresh-token")
+    public SuccessResponse<UserLoginResDTO> refreshToken(@Valid @RequestBody RefreshTokenReqDTO refreshTokenReqDTO) throws TokenExpiredException, AccessTokenException, BadTokenException {
+        UserLoginResDTO resposne = jwtService.validateRefreshTokenAndGenerateAccessTokenAndRefreshToken(refreshTokenReqDTO.getRefreshToken());
+        return new SuccessResponse<UserLoginResDTO>("Token Refreshed Successfully", resposne);
     }
 }

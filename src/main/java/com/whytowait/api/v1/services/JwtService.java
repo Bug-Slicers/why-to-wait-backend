@@ -1,9 +1,12 @@
 package com.whytowait.api.v1.services;
 
 import com.whytowait.api.common.exceptions.AccessTokenException;
+import com.whytowait.api.common.exceptions.ApiException;
 import com.whytowait.api.common.exceptions.BadTokenException;
 import com.whytowait.api.common.exceptions.TokenExpiredException;
 import com.whytowait.domain.dto.user.UserDetailsDTO;
+import com.whytowait.domain.dto.user.UserLoginReqDTO;
+import com.whytowait.domain.dto.user.UserLoginResDTO;
 import com.whytowait.repository.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -28,12 +31,9 @@ JwtService {
 
     private static final String SECRET_KEY = "YourBase64EncodedSecretKeyHere1234567890123456"; // Replace with a valid base64-encoded key
 
-    public String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
+    private static final String REFRESH_TOKEN_SECRET_KEY = "YourBase64EncodedSecretKeyHere1234567890123456789";
 
-        Date now = new Date();
-        Date expiration = new Date(System.currentTimeMillis() + 15 * 60 * 1000);
-
+    private String createToken(String username, String secretKey, Date now, Date expiration, Map<String, Object> claims) {
         return Jwts.
                 builder().
                 claims().
@@ -42,19 +42,47 @@ JwtService {
                 issuedAt(now).
                 expiration(expiration).
                 and().
-                signWith(generateKey()).
+                signWith(generateKey(secretKey)).
                 compact();
     }
 
-    private SecretKey generateKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+    public String generateToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+
+        Date now = new Date();
+        Date expiration = new Date(System.currentTimeMillis() + 15 * 60 * 1000);
+
+        return createToken(
+                username,
+                SECRET_KEY,
+                now,
+                expiration,
+                claims
+        );
+    }
+
+    public String generateRefreshToken(String username) {
+        Date now = new Date();
+        Date expiration = new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000);
+
+        return createToken(
+                username,
+                REFRESH_TOKEN_SECRET_KEY,
+                now,
+                expiration,
+                null
+        );
+    }
+
+    private SecretKey generateKey(String secretKey) {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public Claims validateTokenAndGetClaims(String token) throws TokenExpiredException, BadTokenException, AccessTokenException {
+    private Claims validateToken(String token, String secretKey) throws TokenExpiredException, BadTokenException, AccessTokenException {
         try {
             Claims claims = Jwts.parser()
-                    .verifyWith(generateKey())
+                    .verifyWith(generateKey(secretKey))
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
@@ -73,5 +101,34 @@ JwtService {
         } catch (JwtException ex) {
             throw new AccessTokenException();
         }
+    }
+
+    public Claims validateTokenAndGetClaims(String token) throws TokenExpiredException, BadTokenException, AccessTokenException {
+        try {
+            return validateToken(token, SECRET_KEY);
+        } catch (ExpiredJwtException ex) {
+            throw new TokenExpiredException();
+        } catch (JwtException ex) {
+            throw new AccessTokenException();
+        }
+    }
+
+    public Claims validateRefreshTokenAndGetClaims(String token) throws TokenExpiredException, BadTokenException, AccessTokenException {
+        try {
+            return validateToken(token, REFRESH_TOKEN_SECRET_KEY);
+        } catch (ApiException ex) {
+            throw new BadTokenException();
+        }
+    }
+
+    public UserLoginResDTO validateRefreshTokenAndGenerateAccessTokenAndRefreshToken(String token) throws TokenExpiredException, AccessTokenException, BadTokenException {
+        Claims claims = validateRefreshTokenAndGetClaims(token);
+        String generatedToken = generateToken(claims.getSubject());
+        String generateRefreshToken = generateRefreshToken(claims.getSubject());
+        return UserLoginResDTO.builder()
+                .token(generatedToken)
+                .refreshToken(generateRefreshToken)
+                .username(claims.getSubject())
+                .build();
     }
 }

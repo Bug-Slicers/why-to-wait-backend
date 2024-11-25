@@ -31,6 +31,7 @@ public class UserService {
         hashedPasswordService.createHashedPassword(createdUser, password);
         UserRegistrationResponseDTO userResponse = UserRegistrationResponseDTO.fromUser(createdUser);
         userResponse.setToken(jwtService.generateToken(createdUser.getMobile()));
+        userResponse.setRefreshToken(jwtService.generateRefreshToken(createdUser.getMobile()));
         return userResponse;
     }
 
@@ -43,8 +44,10 @@ public class UserService {
         }
 
         if (hashedPasswordService.checkPassword(user.getId(), userLoginDTO.getPassword())) {
-            String token = jwtService.generateToken(userLoginDTO.getMobile());
+            String token = jwtService.generateToken(user.getMobile());
+            String refreshToken = jwtService.generateRefreshToken(user.getMobile());
             response.setToken(token);
+            response.setRefreshToken(refreshToken);
             response.setUsername(userLoginDTO.getMobile());
             return response;
         } else {

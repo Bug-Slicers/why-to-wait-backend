@@ -30,7 +30,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
     static final List<String> PUBLIC_ENDPOINTS = List.of(
             "/auth/login",
-            "/auth/signup"
+            "/auth/signup",
+            "/auth/refresh-token"
     );
 
     @Autowired
