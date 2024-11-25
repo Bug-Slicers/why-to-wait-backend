@@ -14,8 +14,10 @@ import com.whytowait.repository.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.Valid;
 import jdk.jfr.DataAmount;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -36,9 +38,11 @@ JwtService {
     @Autowired
     MerchantManagerRepository merchantManagerRepository;
 
-    private static final String SECRET_KEY = "YourBase64EncodedSecretKeyHere1234567890123456"; // Replace with a valid base64-encoded key
+    @Value("${jwt.secret_key:YourBase64EncodedSecretKeyHere1234567890123456}")
+    private String SECRET_KEY;
 
-    private static final String REFRESH_TOKEN_SECRET_KEY = "YourBase64EncodedSecretKeyHere1234567890123456789";
+    @Value("${jwt.refresh_token_secret_key:YourBase64EncodedSecretKeyHere1234567890123456789}")
+    private String REFRESH_TOKEN_SECRET_KEY;
 
     private String createToken(String username, String secretKey, Date now, Date expiration, Map<String, Object> claims) {
         return Jwts.

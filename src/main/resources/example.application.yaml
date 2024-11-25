@@ -15,3 +15,7 @@ spring:
     show-sql: true
   liquibase:
     change-log: changelog-master.yaml
+
+jwt:
+  secret_key: "yourVerySecretKeyKeepItLong"
+  refresh_token_secret_key: "yourVeryVerySecretKeyForRefreshTokenKeepItLong"
