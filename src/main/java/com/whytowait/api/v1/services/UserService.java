@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -37,7 +38,7 @@ public class UserService {
         User createdUser = userRepository.save(user);
         hashedPasswordService.createHashedPassword(createdUser, password);
         UserRegistrationResponseDTO userResponse = UserRegistrationResponseDTO.fromUser(createdUser);
-        userResponse.setToken(jwtService.generateToken(createdUser.getMobile(), createdUser.getRole().name(), null));
+        userResponse.setToken(jwtService.generateToken(createdUser.getMobile(), createdUser.getRole().name(), new ArrayList<>()));
         userResponse.setRefreshToken(jwtService.generateRefreshToken(createdUser.getMobile()));
         return userResponse;
     }
