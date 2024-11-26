@@ -47,6 +47,11 @@ public class MenuItem {
     @Column(nullable = false)
     private Float price;
 
+    @NotNull
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isAvailable = true;
+
     @Column
     private String imageUrl;
 
