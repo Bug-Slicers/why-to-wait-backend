@@ -47,11 +47,11 @@ public class UserService {
         UserLoginResDTO response = new UserLoginResDTO();
         User user = userRepository.findByMobile(userLoginDTO.getMobile());
 
-        List<MerchantManager> merchantRoles = merchantManagerRepository.findByUserId(user.getId());
-
         if (user == null) {
             throw new UnauthorizedException("Invalid Credentials");
         }
+
+        List<MerchantManager> merchantRoles = merchantManagerRepository.findByUserId(user.getId());
 
         if (hashedPasswordService.checkPassword(user.getId(), userLoginDTO.getPassword())) {
             String token = jwtService.generateToken(user.getMobile(), user.getRole().name(), merchantRoles);
