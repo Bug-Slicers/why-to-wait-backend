@@ -92,8 +92,8 @@ CREATE TABLE "hashed_password" (
 CREATE TABLE "merchant" (
   "id" uuid PRIMARY KEY,
   "restaurant_name" varchar,
-  "address" uuid NOT NULL,
-  "owner" uuid NOT NULL,
+  "address_id" uuid NOT NULL,
+  "owner_id" uuid NOT NULL,
   "type" merchant_type NOT NULL DEFAULT 'DINE_IN',
   "is_online" bool NOT NULL DEFAULT false,
   "created_at" timestamp,
@@ -227,11 +227,11 @@ ALTER TABLE "hashed_password" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("i
 --rollback ALTER TABLE "hashed_password" DROP CONSTRAINT "hashed_password_user_id_fkey";
 
 --changeset rohit.patil:023
-ALTER TABLE "merchant" ADD FOREIGN KEY ("address") REFERENCES "address" ("id");
+ALTER TABLE "merchant" ADD FOREIGN KEY ("address_id") REFERENCES "address" ("id");
 --rollback ALTER TABLE "merchant" DROP CONSTRAINT "merchant_address_fkey";
 
 --changeset rohit.patil:024
-ALTER TABLE "merchant" ADD FOREIGN KEY ("owner") REFERENCES "users" ("id");
+ALTER TABLE "merchant" ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id");
 --rollback ALTER TABLE "merchant" DROP CONSTRAINT "merchant_owner_fkey";
 
 --changeset rohit.patil:025
