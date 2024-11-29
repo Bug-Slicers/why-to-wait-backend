@@ -66,7 +66,7 @@ JwtService {
                 .collect(Collectors.toList()));
 
         Date now = new Date();
-        Date expiration = new Date(System.currentTimeMillis() + 15 * 60 * 1000);
+        Date expiration = new Date(System.currentTimeMillis() + 4*15 * 60 * 1000);
 
         return createToken(
                 username,

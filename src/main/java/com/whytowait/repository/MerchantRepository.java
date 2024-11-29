@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface MerchantRepository extends JpaRepository<Merchant, UUID> {
+    Merchant findByOwnerId(UUID ownerId);
 }
