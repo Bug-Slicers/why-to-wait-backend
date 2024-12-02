@@ -5,12 +5,14 @@ import com.whytowait.domain.dto.time.TimingReqDTO;
 import com.whytowait.domain.dto.time.TimingItemDTO;
 import com.whytowait.domain.models.Merchant;
 import com.whytowait.domain.models.Timing;
+import com.whytowait.domain.models.enums.DayOfWeek;
 import com.whytowait.repository.MerchantRepository;
 import com.whytowait.repository.TimingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,16 +36,21 @@ public class TimingService {
             throw new BadRequestException("All days should be there");
         }
 
+        List<Timing> existingTimings = timingRepository.findByMerchantId(merchant.get().getId());
+        if (!existingTimings.isEmpty()) {
+            throw new BadRequestException("Timings are already created");
+        }
+
         for (TimingItemDTO dto : reqDTO.getTimings()) {
             Timing timing = TimingItemDTO.toTiming(reqDTO.getMerchantId(), dto);
-            Timing savedTiming = timingRepository.save(timing);
+            timingRepository.save(timing);
         }
     }
 
     public String updateTimings(TimingReqDTO timingReqDTO) {
         UUID merchantId = timingReqDTO.getMerchantId();
         for (TimingItemDTO dto : timingReqDTO.getTimings()) {
-            Integer updateTimingStatus = timingRepository.updateTimings(dto.getIsClosed(), dto.getOpenTime(), dto.getCloseTime(), merchantId, dto.getDayOfWeek().name());
+            timingRepository.updateTimings(dto.getIsClosed(), dto.getOpenTime(), dto.getCloseTime(), merchantId, dto.getDayOfWeek());
         }
         return "Update Success";
     }
