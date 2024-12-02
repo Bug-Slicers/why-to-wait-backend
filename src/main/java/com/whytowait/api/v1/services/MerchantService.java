@@ -1,5 +1,6 @@
 package com.whytowait.api.v1.services;
 
+import com.whytowait.api.common.exceptions.BadRequestException;
 import com.whytowait.domain.dto.merchant.CreateMerchantRequestDTO;
 import com.whytowait.domain.dto.user.UserDetailsDTO;
 import com.whytowait.domain.models.Address;
@@ -18,13 +19,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class MerchantCreateService {
+public class MerchantService {
 
     @Autowired
     MerchantRepository merchantRepository;
 
     @Autowired
-    AddressRepository addressRepository;
+    AddressService addressService;
 
     @Autowired
     UserRepository userRepository;
@@ -33,7 +34,7 @@ public class MerchantCreateService {
     MerchantManagerRepository merchantManagerRepository;
 
     @Transactional
-    public Merchant createMerchant(CreateMerchantRequestDTO createMerchantReqDTO) {
+    public Merchant createMerchant(CreateMerchantRequestDTO createMerchantReqDTO) throws BadRequestException {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsDTO userDetails = (UserDetailsDTO) authentication.getPrincipal();
@@ -41,24 +42,13 @@ public class MerchantCreateService {
         User user = userRepository.findByMobile(userDetails.getMobile());
         Merchant fetchMerchantByOwnerId = merchantRepository.findByOwnerId(user.getId());
         if (fetchMerchantByOwnerId != null) {
-            return null;
+            throw new BadRequestException("User is already owner of a merchant account");
         }
 
-        Address address = Address.builder().addressLine1(createMerchantReqDTO.getAddressLine1())
-                .addressLine2(createMerchantReqDTO.getAddressLine2())
-                .city(createMerchantReqDTO.getCity())
-                .district(createMerchantReqDTO.getDistrict())
-                .state(createMerchantReqDTO.getState())
-                .pincode(createMerchantReqDTO.getPincode())
-                .build();
-        Address savedAddress = addressRepository.save(address);
+        Address address = CreateMerchantRequestDTO.toAddress(createMerchantReqDTO);
+        Address savedAddress = addressService.createAddress(address);
 
-        Merchant merchant = Merchant.builder().restaurantName(createMerchantReqDTO.getRestaurantName())
-                .address(savedAddress)
-                .owner(user)
-                .isOnline(false)
-                .build();
-        
+        Merchant merchant = CreateMerchantRequestDTO.toMerchant(createMerchantReqDTO, savedAddress, user);
         Merchant savedMerchant = merchantRepository.save(merchant);
 
         MerchantManager merchantManager = MerchantManager.builder().merchantId(savedMerchant.getId()).userId(user.getId()).role(MerchantRole.MERCHANT_OWNER).build();

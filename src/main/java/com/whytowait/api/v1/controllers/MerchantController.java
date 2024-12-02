@@ -2,7 +2,6 @@ package com.whytowait.api.v1.controllers;
 
 import com.whytowait.api.common.exceptions.BadRequestException;
 import com.whytowait.api.common.responses.ApiResponse;
-import com.whytowait.api.common.responses.BadRequestResponse;
 import com.whytowait.api.common.responses.SuccessResponse;
 import com.whytowait.api.v1.services.JwtService;
 import com.whytowait.api.v1.services.MerchantService;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/merchant")
-public class MerchantCreateController {
+public class MerchantController {
 
     @Autowired
     JwtService jwtService;

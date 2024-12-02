@@ -81,7 +81,6 @@ public class JwtFilter extends OncePerRequestFilter {
                     .buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
         } catch (ApiException ex) {
-            System.out.println(ex);
             ApiResponse res = ApiException.handle(ex);
             res.writeToResponse(response);
             return;
