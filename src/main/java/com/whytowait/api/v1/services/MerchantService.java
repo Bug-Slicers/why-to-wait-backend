@@ -52,7 +52,7 @@ public class MerchantService {
         Merchant savedMerchant = merchantRepository.save(merchant);
 
         MerchantManager merchantManager = MerchantManager.builder().merchantId(savedMerchant.getId()).userId(user.getId()).role(MerchantRole.MERCHANT_OWNER).build();
-        MerchantManager savedMerchantManager = merchantManagerRepository.save(merchantManager);
+        merchantManagerRepository.save(merchantManager);
 
         return savedMerchant;
     }
