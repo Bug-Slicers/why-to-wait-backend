@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MerchantCreateService {
@@ -31,14 +32,15 @@ public class MerchantCreateService {
     @Autowired
     MerchantManagerRepository merchantManagerRepository;
 
-    public Merchant createMerchant(CreateMerchantRequestDTO createMerchantReqDTO){
+    @Transactional
+    public Merchant createMerchant(CreateMerchantRequestDTO createMerchantReqDTO) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsDTO userDetails = (UserDetailsDTO) authentication.getPrincipal();
 
-        User user =userRepository.findByMobile(userDetails.getMobile());
-        Merchant fetchMerchantById = merchantRepository.findByOwnerId(user.getId());
-        if(fetchMerchantById!=null){
+        User user = userRepository.findByMobile(userDetails.getMobile());
+        Merchant fetchMerchantByOwnerId = merchantRepository.findByOwnerId(user.getId());
+        if (fetchMerchantByOwnerId != null) {
             return null;
         }
 
@@ -53,14 +55,14 @@ public class MerchantCreateService {
 
         Merchant merchant = Merchant.builder().restaurantName(createMerchantReqDTO.getRestaurantName())
                 .address(savedAddress)
-                .owner(user) // Associate owner fetched from username
-                .isOnline(false) // Default value
+                .owner(user)
+                .isOnline(false)
                 .build();
+        
         Merchant savedMerchant = merchantRepository.save(merchant);
 
-        MerchantManager merchantManager =MerchantManager.builder().merchantId(savedMerchant.getId()).userId(user.getId()).role(MerchantRole.MERCHANT_OWNER).build();
+        MerchantManager merchantManager = MerchantManager.builder().merchantId(savedMerchant.getId()).userId(user.getId()).role(MerchantRole.MERCHANT_OWNER).build();
         MerchantManager savedMerchantManager = merchantManagerRepository.save(merchantManager);
-        System.out.println("Saved Merchant Manager :"+savedMerchantManager);
 
         return savedMerchant;
     }
