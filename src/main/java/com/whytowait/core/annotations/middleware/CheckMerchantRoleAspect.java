@@ -34,15 +34,11 @@ public class CheckMerchantRoleAspect {
         try {
             MethodSignature signature = (MethodSignature) joinPoint.getSignature();
             Method method = signature.getMethod();
-            System.out.println(Arrays.toString(method.getParameters()));
             CheckMerchantManagerRole checkMerchantManagerRole = method.getAnnotation(CheckMerchantManagerRole.class);
 
             SourceType source = checkMerchantManagerRole.source();
-
             String field = checkMerchantManagerRole.field();
-
             MerchantRole role = checkMerchantManagerRole.role();
-
             String merchantId = getFieldValue(joinPoint, source, field);
 
             if (!checkRole(merchantId, role)) {
@@ -84,7 +80,6 @@ public class CheckMerchantRoleAspect {
                 } catch (Exception ex) {
 //                    do nothing will throw if nothing is found for all args
                 }
-
             }
         }
         throw new NoSuchFieldException();
