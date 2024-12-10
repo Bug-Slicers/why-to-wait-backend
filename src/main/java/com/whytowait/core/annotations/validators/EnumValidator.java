@@ -1,5 +1,6 @@
-package com.whytowait.core.annotations;
+package com.whytowait.core.annotations.validators;
 
+import com.whytowait.core.annotations.ValidEnum;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

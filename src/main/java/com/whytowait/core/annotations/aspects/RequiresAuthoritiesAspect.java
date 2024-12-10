@@ -1,9 +1,12 @@
-package com.whytowait.core.annotations;
+package com.whytowait.core.annotations.aspects;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.whytowait.api.common.exceptions.BadRequestException;
 import com.whytowait.api.common.exceptions.UnauthorizedException;
+import com.whytowait.config.BufferedRequestWrapper;
+import com.whytowait.core.annotations.RequiresAuthorities;
+import com.whytowait.core.annotations.enums.RequestSource;
 import com.whytowait.domain.models.enums.MerchantRole;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.annotation.Aspect;
@@ -12,18 +15,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Aspect
 @Component
@@ -32,7 +28,7 @@ public class RequiresAuthoritiesAspect {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Before("@annotation(requiresAuthorities)")
-    public void handleRequiresAuthorities(RequiresAuthorities requiresAuthorities) throws IOException {
+    public void handleRequiresAuthorities(RequiresAuthorities requiresAuthorities) throws UnauthorizedException, BadRequestException {
 
         String[] requiredAuthorities = requiresAuthorities.requiredAuthorities();
         String source = requiresAuthorities.source();
@@ -40,48 +36,37 @@ public class RequiresAuthoritiesAspect {
         String activeMerchantClaim = GetActiveMerchantClaim(source);
 
         if (activeMerchantClaim == null || activeMerchantClaim.isEmpty()) {
-            throw new RuntimeException(new BadRequestException("MerchantId not found in request header or param"));
+            throw new RuntimeException(new BadRequestException("MerchantId not found in request"));
         }
 
-        // Perform custom authorization logic
         if (!hasRequiredAuthorities(requiredAuthorities, activeMerchantClaim)) {
-            throw new RuntimeException(new UnauthorizedException("No Role not found"));
+            throw new RuntimeException(new UnauthorizedException("Required role not found"));
         }
     }
 
-    private String GetActiveMerchantClaim(String source) throws IOException {
+    private String GetActiveMerchantClaim(String source) throws UnauthorizedException, BadRequestException {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-
-
         try {
-            if ("Param".equalsIgnoreCase(source)) {
-                return request.getParameter("MerchantId");
-            }
+            BufferedRequestWrapper wrappedRequest = new BufferedRequestWrapper(request);
+            if (RequestSource.PARAMS.name().equalsIgnoreCase(source)) {
 
-            if ("Body".equalsIgnoreCase(source)) {
+                return wrappedRequest.getParameter("merchantId");
 
-                // Read the request body
-                StringBuilder stringBuilder = new StringBuilder();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println("line" + line);
-                    stringBuilder.append(line);
-                }
+            } else if (RequestSource.HEADER.name().equalsIgnoreCase(source)) {
 
-                String requestBody = stringBuilder.toString();
-                System.out.println(requestBody);
-                // Parse JSON body and extract the specific field
+                return wrappedRequest.getParameter("merchant-id");
+
+            } else if (RequestSource.BODY.name().equalsIgnoreCase(source)) {
+
+                String requestBody = wrappedRequest.getBody();
                 JsonNode rootNode = objectMapper.readTree(requestBody);
 
-                // Extract the field value
-                return rootNode.path("restaurantName").asText();
+                return rootNode.path("merchantId").asText();
             }
         } catch (Exception ex) {
             throw new RuntimeException(new BadRequestException("MerchantId not found in request"));
         }
-//        throw new RuntimeException(new BadRequestException("MerchantId not found in request"));
-        return "";
+        throw new BadRequestException("MerchantId not found in request");
     }
 
     ;
