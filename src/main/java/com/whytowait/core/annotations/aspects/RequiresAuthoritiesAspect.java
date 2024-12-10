@@ -30,8 +30,8 @@ public class RequiresAuthoritiesAspect {
     @Before("@annotation(requiresAuthorities)")
     public void handleRequiresAuthorities(RequiresAuthorities requiresAuthorities) throws UnauthorizedException, BadRequestException {
 
-        String[] requiredAuthorities = requiresAuthorities.requiredAuthorities();
-        String source = requiresAuthorities.source();
+        MerchantRole[] requiredAuthorities = requiresAuthorities.requiredAuthorities();
+        RequestSource source = requiresAuthorities.source();
 
         String activeMerchantClaim = GetActiveMerchantClaim(source);
 
@@ -44,24 +44,24 @@ public class RequiresAuthoritiesAspect {
         }
     }
 
-    private String GetActiveMerchantClaim(String source) throws UnauthorizedException, BadRequestException {
+    private String GetActiveMerchantClaim(RequestSource source) throws UnauthorizedException, BadRequestException {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         try {
             BufferedRequestWrapper wrappedRequest = new BufferedRequestWrapper(request);
-            if (RequestSource.PARAMS.name().equalsIgnoreCase(source)) {
+            if (RequestSource.PARAMS == source) {
 
-                return wrappedRequest.getParameter("merchantId");
+                return wrappedRequest.getParameter(RequestSource.PARAMS.getSource());
 
-            } else if (RequestSource.HEADER.name().equalsIgnoreCase(source)) {
+            } else if (RequestSource.HEADER == source) {
 
-                return wrappedRequest.getParameter("merchant-id");
+                return wrappedRequest.getHeader(RequestSource.HEADER.getSource());
 
-            } else if (RequestSource.BODY.name().equalsIgnoreCase(source)) {
+            } else if (RequestSource.BODY == source) {
 
                 String requestBody = wrappedRequest.getBody();
                 JsonNode rootNode = objectMapper.readTree(requestBody);
 
-                return rootNode.path("merchantId").asText();
+                return rootNode.path(RequestSource.BODY.getSource()).asText();
             }
         } catch (Exception ex) {
             throw new RuntimeException(new BadRequestException("MerchantId not found in request"));
@@ -71,13 +71,13 @@ public class RequiresAuthoritiesAspect {
 
     ;
 
-    public boolean hasRequiredAuthorities(String[] requiredAuthorities, String merchantId) {
+    public boolean hasRequiredAuthorities(MerchantRole[] requiredAuthorities, String merchantId) {
 
-        List<String> requiredAuths = Arrays.stream(requiredAuthorities).toList();
+        List<MerchantRole> requiredAuths = Arrays.stream(requiredAuthorities).toList();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         List<String> authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
-        if (requiredAuths.contains(MerchantRole.MERCHANT_OWNER.name())) {
+        if (requiredAuths.contains(MerchantRole.MERCHANT_OWNER)) {
             String userRole = "MERCHANT_" + merchantId + "_" + MerchantRole.MERCHANT_OWNER.name();
             if (authorities.contains(userRole)) {
                 return true;
@@ -85,7 +85,7 @@ public class RequiresAuthoritiesAspect {
         }
         ;
 
-        if (requiredAuths.contains(MerchantRole.MERCHANT_ADMIN.name())) {
+        if (requiredAuths.contains(MerchantRole.MERCHANT_ADMIN)) {
             String userRole = "MERCHANT_" + merchantId + "_" + MerchantRole.MERCHANT_ADMIN.name();
             if (authorities.contains(userRole)) {
                 return true;
@@ -93,8 +93,8 @@ public class RequiresAuthoritiesAspect {
         }
         ;
 
-        String userRole = "MERCHANT_" + merchantId + "_" + MerchantRole.MERCHANT_OPERATOR.name();
-        if (requiredAuths.contains(MerchantRole.MERCHANT_OPERATOR.name())) {
+        if (requiredAuths.contains(MerchantRole.MERCHANT_OPERATOR)) {
+            String userRole = "MERCHANT_" + merchantId + "_" + MerchantRole.MERCHANT_OPERATOR.name();
             if (authorities.contains(userRole)) {
                 return true;
             }
