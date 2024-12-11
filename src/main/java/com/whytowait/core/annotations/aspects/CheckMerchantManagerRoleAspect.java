@@ -72,13 +72,6 @@ public class CheckMerchantManagerRoleAspect {
     ;
 
     public boolean hasRequiredAuthorities(MerchantRole requiredAuthority, String merchantId) {
-        // Define priorities for roles
-        Map<MerchantRole, Integer> rolePriorityMap = Map.of(
-                MerchantRole.MERCHANT_OWNER, 1,
-                MerchantRole.MERCHANT_ADMIN, 2,
-                MerchantRole.MERCHANT_OPERATOR, 3
-        );
-
         // Get the current user's authorities
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         List<String> authorities = authentication.getAuthorities()
