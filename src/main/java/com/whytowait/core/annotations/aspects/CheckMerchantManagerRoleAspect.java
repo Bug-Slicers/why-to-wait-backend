@@ -29,11 +29,11 @@ public class CheckMerchantManagerRoleAspect {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Before("@annotation(requiresAuthorities)")
-    public void handleRequiresAuthorities(CheckMerchantManagerRole requiresAuthorities) throws UnauthorizedException, BadRequestException {
+    @Before("@annotation(checkMerchantManagerRole)")
+    public void handleRequiresAuthorities(CheckMerchantManagerRole checkMerchantManagerRole) throws UnauthorizedException, BadRequestException {
 
-        MerchantRole[] requiredAuthorities = requiresAuthorities.requiredAuthorities();
-        RequestSource source = requiresAuthorities.source();
+        MerchantRole[] requiredAuthorities = checkMerchantManagerRole.requiredAuthorities();
+        RequestSource source = checkMerchantManagerRole.source();
 
         String extractedFieldValue = extractFieldValue(source);
 
