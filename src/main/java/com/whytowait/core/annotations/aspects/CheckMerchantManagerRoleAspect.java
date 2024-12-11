@@ -18,8 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +30,7 @@ public class CheckMerchantManagerRoleAspect {
     @Before("@annotation(checkMerchantManagerRole)")
     public void handleRequiresAuthorities(CheckMerchantManagerRole checkMerchantManagerRole) throws UnauthorizedException, BadRequestException {
 
-        MerchantRole[] requiredAuthorities = checkMerchantManagerRole.requiredAuthorities();
+        MerchantRole requiredAuthorities = checkMerchantManagerRole.requiredAuthority();
         RequestSource source = checkMerchantManagerRole.source();
 
         String extractedFieldValue = extractFieldValue(source);
@@ -73,18 +71,13 @@ public class CheckMerchantManagerRoleAspect {
 
     ;
 
-    public boolean hasRequiredAuthorities(MerchantRole[] requiredAuthorities, String merchantId) {
+    public boolean hasRequiredAuthorities(MerchantRole requiredAuthority, String merchantId) {
         // Define priorities for roles
         Map<MerchantRole, Integer> rolePriorityMap = Map.of(
                 MerchantRole.MERCHANT_OWNER, 1,
                 MerchantRole.MERCHANT_ADMIN, 2,
                 MerchantRole.MERCHANT_OPERATOR, 3
         );
-
-        // Convert requiredAuthorities to a sorted list based on priority
-        List<MerchantRole> sortedRequiredAuths = Arrays.stream(requiredAuthorities)
-                .sorted(Comparator.comparingInt(rolePriorityMap::get))
-                .toList();
 
         // Get the current user's authorities
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -94,13 +87,8 @@ public class CheckMerchantManagerRoleAspect {
                 .toList();
 
         // Check roles priority-wise
-        for (MerchantRole role : sortedRequiredAuths) {
-            String userRole = "MERCHANT_" + merchantId + "_" + role.name();
-            if (authorities.contains(userRole)) {
-                return true;
-            }
-        }
-        return false;
+        String userRole = "MERCHANT_" + merchantId + "_" + requiredAuthority.name();
+        return authorities.contains(userRole);
     }
 
 }
