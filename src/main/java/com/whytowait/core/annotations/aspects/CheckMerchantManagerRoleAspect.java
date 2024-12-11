@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.whytowait.api.common.exceptions.BadRequestException;
 import com.whytowait.api.common.exceptions.UnauthorizedException;
 import com.whytowait.config.BufferedRequestWrapper;
-import com.whytowait.core.annotations.RequiresAuthorities;
+import com.whytowait.core.annotations.CheckMerchantManagerRole;
 import com.whytowait.core.annotations.enums.RequestSource;
 import com.whytowait.domain.models.enums.MerchantRole;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,32 +19,34 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 @Aspect
 @Component
-public class RequiresAuthoritiesAspect {
+public class CheckMerchantManagerRoleAspect {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Before("@annotation(requiresAuthorities)")
-    public void handleRequiresAuthorities(RequiresAuthorities requiresAuthorities) throws UnauthorizedException, BadRequestException {
+    public void handleRequiresAuthorities(CheckMerchantManagerRole requiresAuthorities) throws UnauthorizedException, BadRequestException {
 
         MerchantRole[] requiredAuthorities = requiresAuthorities.requiredAuthorities();
         RequestSource source = requiresAuthorities.source();
 
-        String activeMerchantClaim = GetActiveMerchantClaim(source);
+        String extractedFieldValue = extractFieldValue(source);
 
-        if (activeMerchantClaim == null || activeMerchantClaim.isEmpty()) {
+        if (extractedFieldValue == null || extractedFieldValue.isEmpty()) {
             throw new RuntimeException(new BadRequestException("MerchantId not found in request"));
         }
 
-        if (!hasRequiredAuthorities(requiredAuthorities, activeMerchantClaim)) {
+        if (!hasRequiredAuthorities(requiredAuthorities, extractedFieldValue)) {
             throw new RuntimeException(new UnauthorizedException("Required role not found"));
         }
     }
 
-    private String GetActiveMerchantClaim(RequestSource source) throws UnauthorizedException, BadRequestException {
+    private String extractFieldValue(RequestSource source) throws UnauthorizedException, BadRequestException {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         try {
             BufferedRequestWrapper wrappedRequest = new BufferedRequestWrapper(request);
@@ -72,37 +74,34 @@ public class RequiresAuthoritiesAspect {
     ;
 
     public boolean hasRequiredAuthorities(MerchantRole[] requiredAuthorities, String merchantId) {
+        // Define priorities for roles
+        Map<MerchantRole, Integer> rolePriorityMap = Map.of(
+                MerchantRole.MERCHANT_OWNER, 1,
+                MerchantRole.MERCHANT_ADMIN, 2,
+                MerchantRole.MERCHANT_OPERATOR, 3
+        );
 
-        List<MerchantRole> requiredAuths = Arrays.stream(requiredAuthorities).toList();
+        // Convert requiredAuthorities to a sorted list based on priority
+        List<MerchantRole> sortedRequiredAuths = Arrays.stream(requiredAuthorities)
+                .sorted(Comparator.comparingInt(rolePriorityMap::get))
+                .toList();
+
+        // Get the current user's authorities
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        List<String> authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+        List<String> authorities = authentication.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
 
-        if (requiredAuths.contains(MerchantRole.MERCHANT_OWNER)) {
-            String userRole = "MERCHANT_" + merchantId + "_" + MerchantRole.MERCHANT_OWNER.name();
+        // Check roles priority-wise
+        for (MerchantRole role : sortedRequiredAuths) {
+            String userRole = "MERCHANT_" + merchantId + "_" + role.name();
             if (authorities.contains(userRole)) {
                 return true;
             }
         }
-        ;
-
-        if (requiredAuths.contains(MerchantRole.MERCHANT_ADMIN)) {
-            String userRole = "MERCHANT_" + merchantId + "_" + MerchantRole.MERCHANT_ADMIN.name();
-            if (authorities.contains(userRole)) {
-                return true;
-            }
-        }
-        ;
-
-        if (requiredAuths.contains(MerchantRole.MERCHANT_OPERATOR)) {
-            String userRole = "MERCHANT_" + merchantId + "_" + MerchantRole.MERCHANT_OPERATOR.name();
-            if (authorities.contains(userRole)) {
-                return true;
-            }
-        }
-        ;
-
         return false;
     }
 
-    ;
 }
+
