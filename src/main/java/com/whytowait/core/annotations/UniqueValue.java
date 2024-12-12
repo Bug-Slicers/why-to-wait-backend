@@ -1,5 +1,6 @@
 package com.whytowait.core.annotations;
 
+import com.whytowait.core.annotations.validators.UniqueValueValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

@@ -33,4 +33,12 @@ public class GlobalExceptionHandler {
         }
         return new InternalErrorResponse();
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ApiResponse handleRunTimeException(RuntimeException ex){
+        if(ex.getCause() instanceof ApiException){
+            return  ApiException.handle((ApiException) ex.getCause());
+        }
+        return new InternalErrorResponse();
+    };
 }
