@@ -14,6 +14,8 @@ public @interface CheckMerchantManagerRole {
 
     MerchantRole requiredAuthority();
 
+    String fieldName();
+
     RequestSource source();
 
 }

@@ -30,38 +30,39 @@ public class CheckMerchantManagerRoleAspect {
     @Before("@annotation(checkMerchantManagerRole)")
     public void handleRequiresAuthorities(CheckMerchantManagerRole checkMerchantManagerRole) throws UnauthorizedException, BadRequestException {
 
-        MerchantRole requiredAuthorities = checkMerchantManagerRole.requiredAuthority();
+        MerchantRole requiredRole = checkMerchantManagerRole.requiredAuthority();
         RequestSource source = checkMerchantManagerRole.source();
+        String sourceField = checkMerchantManagerRole.fieldName();
 
-        String extractedFieldValue = extractFieldValue(source);
+        String extractedFieldValue = extractFieldValue(source, sourceField);
 
         if (extractedFieldValue == null || extractedFieldValue.isEmpty()) {
             throw new RuntimeException(new BadRequestException("MerchantId not found in request"));
         }
 
-        if (!hasRequiredAuthorities(requiredAuthorities, extractedFieldValue)) {
-            throw new RuntimeException(new UnauthorizedException("Required role not found"));
+        if (!hasRequiredAuthorities(requiredRole, extractedFieldValue)) {
+            throw new RuntimeException(new UnauthorizedException("Unauthorized to perform action"));
         }
     }
 
-    private String extractFieldValue(RequestSource source) throws UnauthorizedException, BadRequestException {
+    private String extractFieldValue(RequestSource source, String sourceField) throws UnauthorizedException, BadRequestException {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         try {
             BufferedRequestWrapper wrappedRequest = new BufferedRequestWrapper(request);
-            if (RequestSource.PARAMS == source) {
+            if (RequestSource.PARAM == source) {
 
-                return wrappedRequest.getParameter(RequestSource.PARAMS.getSource());
+                return wrappedRequest.getParameter(sourceField);
 
             } else if (RequestSource.HEADER == source) {
 
-                return wrappedRequest.getHeader(RequestSource.HEADER.getSource());
+                return wrappedRequest.getHeader(sourceField);
 
             } else if (RequestSource.BODY == source) {
 
                 String requestBody = wrappedRequest.getBody();
                 JsonNode rootNode = objectMapper.readTree(requestBody);
 
-                return rootNode.path(RequestSource.BODY.getSource()).asText();
+                return rootNode.path(sourceField).asText();
             }
         } catch (Exception ex) {
             throw new RuntimeException(new BadRequestException("MerchantId not found in request"));
@@ -73,16 +74,31 @@ public class CheckMerchantManagerRoleAspect {
 
     public boolean hasRequiredAuthorities(MerchantRole requiredAuthority, String merchantId) {
         // Get the current user's authorities
+
+        Map<String, Integer> rolePriorityMap = Map.of(
+                "MERCHANT_" + merchantId + "_MERCHANT_OWNER", 1,
+                "MERCHANT_" + merchantId + "_MERCHANT_ADMIN", 2,
+                "MERCHANT_" + merchantId + "_MERCHANT_OPERATOR", 3
+        );
+
+        Integer requiredAuthorityPriority = rolePriorityMap.get("MERCHANT_" + merchantId + "_" + requiredAuthority);
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         List<String> authorities = authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        // Check roles priority-wise
-        String userRole = "MERCHANT_" + merchantId + "_" + requiredAuthority.name();
-        return authorities.contains(userRole);
+        List<String> merchantRoles = authorities.stream().filter(x -> x.contains(merchantId)).toList();
+
+        if (merchantRoles.isEmpty()) {
+            return false;
+        }
+        Integer userRolePriority = rolePriorityMap.get(merchantRoles.getFirst());
+        return userRolePriority <= requiredAuthorityPriority;
     }
 
+    ;
 }
 

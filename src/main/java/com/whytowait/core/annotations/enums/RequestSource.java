@@ -4,13 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum RequestSource {
-    HEADER("merchant-id"),
-    PARAMS("merchantId"),
-    BODY("merchantId");
-
-    private final String source;
-
-    RequestSource(String source) {
-        this.source = source;
-    }
+    HEADER,
+    BODY,
+    PARAM
 }
