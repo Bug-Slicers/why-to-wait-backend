@@ -45,7 +45,7 @@ public class CheckMerchantManagerRoleAspect {
         }
     }
 
-    private String extractFieldValue(RequestSource source, String sourceField) throws UnauthorizedException, BadRequestException {
+    private String extractFieldValue(RequestSource source, String sourceField) throws BadRequestException {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         try {
             BufferedRequestWrapper wrappedRequest = new BufferedRequestWrapper(request);
@@ -70,7 +70,6 @@ public class CheckMerchantManagerRoleAspect {
         throw new BadRequestException("MerchantId not found in request");
     }
 
-    ;
 
     public boolean hasRequiredAuthorities(MerchantRole requiredAuthority, String merchantId) {
         // Get the current user's authorities
@@ -98,7 +97,5 @@ public class CheckMerchantManagerRoleAspect {
         Integer userRolePriority = rolePriorityMap.get(merchantRoles.getFirst());
         return userRolePriority <= requiredAuthorityPriority;
     }
-
-    ;
 }
 
