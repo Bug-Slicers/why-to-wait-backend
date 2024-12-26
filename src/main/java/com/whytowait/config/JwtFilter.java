@@ -46,15 +46,17 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        BufferedRequestWrapper wrappedRequest = new BufferedRequestWrapper(request);
         try {
-            String requestUri = request.getRequestURI();
+
+            String requestUri = wrappedRequest.getRequestURI();
 
             if (isPublicEndpoint(requestUri)) {
-                filterChain.doFilter(request, response);
+                filterChain.doFilter(wrappedRequest, response);
                 return;
             }
 
-            String authHeader = request.getHeader("Authorization");
+            String authHeader = wrappedRequest.getHeader("Authorization");
 
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 throw new AccessTokenException("Invalid or missing Authorization header");
@@ -78,7 +80,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
             authToken.setDetails(new WebAuthenticationDetailsSource()
-                    .buildDetails(request));
+                    .buildDetails(wrappedRequest));
             SecurityContextHolder.getContext().setAuthentication(authToken);
         } catch (ApiException ex) {
             ApiResponse res = ApiException.handle(ex);
@@ -86,7 +88,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(wrappedRequest, response);
     }
 
     private boolean isPublicEndpoint(String requestUri) {
