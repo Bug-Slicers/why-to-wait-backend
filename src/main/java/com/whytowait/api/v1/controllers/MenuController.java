@@ -34,6 +34,7 @@ public class MenuController {
         return new SuccessResponse<>("Menu Category Created Successfully", CreateMenuCategoryResponseDTO.fromMenuCategory(response));
     }
 
+    @CheckMerchantManagerRole(requiredAuthority = MerchantRole.MERCHANT_OWNER, fieldName = "MerchantId", source = RequestSource.BODY)
     @PostMapping(path = "/create-item", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<MenuItem> CreateMenuItem(@RequestPart(value = "imageFile", required = false) MultipartFile imageFile, @RequestPart("menuItem") CreateMenuItemRequestDTO requestDTO) throws BadRequestException, IOException {
         MenuItem response = menuService.CreateMenuItem(requestDTO, imageFile);

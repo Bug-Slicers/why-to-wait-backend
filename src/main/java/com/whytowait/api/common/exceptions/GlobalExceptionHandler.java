@@ -16,7 +16,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ValidationErrorResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
-        ex.printStackTrace();
         BindingResult result = ex.getBindingResult();
         Map<String, String> errorMap = new HashMap<>();
 
@@ -37,7 +36,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ApiResponse handleRunTimeException(RuntimeException ex) {
-        ex.printStackTrace();
         if (ex.getCause() instanceof ApiException) {
             return ApiException.handle((ApiException) ex.getCause());
         }
