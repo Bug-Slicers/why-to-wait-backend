@@ -35,7 +35,7 @@ public class MenuController {
     }
 
     @PostMapping(path = "/create-item", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<MenuItem> CreateMenuItem(@RequestPart("imageFile") MultipartFile imageFile, @RequestPart("menuItem") CreateMenuItemRequestDTO requestDTO) throws BadRequestException, IOException {
+    public ApiResponse<MenuItem> CreateMenuItem(@RequestPart(value = "imageFile", required = false) MultipartFile imageFile, @RequestPart("menuItem") CreateMenuItemRequestDTO requestDTO) throws BadRequestException, IOException {
         MenuItem response = menuService.CreateMenuItem(requestDTO, imageFile);
         return new SuccessResponse<MenuItem>("Menu Item Created Successfully", response);
     }

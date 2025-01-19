@@ -56,8 +56,11 @@ public class MenuService {
             throw new BadRequestException("Category Does not Exists");
         }
 
-        String filePath = requestDTO.getMerchantId().toString() + "/" + requestDTO.getName();
-        String imageLink = cloudflareR2Service.UploadFile(filePath, image);
+        String imageLink = null;
+        if (image != null) {
+            String filePath = requestDTO.getMerchantId().toString() + "/" + requestDTO.getName();
+            imageLink = cloudflareR2Service.UploadFile(filePath, image);
+        }
 
         MenuItem menuItem = CreateMenuItemRequestDTO.toMenuItem(requestDTO, imageLink);
         menuItemRepository.save(menuItem);
