@@ -18,6 +18,7 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
         InputStream inputStream = request.getInputStream();
         bodyBytes = inputStream.readAllBytes();
         body = new String(bodyBytes);
+        System.out.println(body);
     }
 
     @Override
