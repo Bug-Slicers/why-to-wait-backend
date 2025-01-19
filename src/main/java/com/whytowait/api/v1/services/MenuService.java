@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -44,17 +46,17 @@ public class MenuService {
         return menuCategory;
     }
 
-    public MenuItem CreateMenuItem(CreateMenuItemRequestDTO requestDTO, MultipartFile image) throws BadRequestException {
+    public MenuItem CreateMenuItem(CreateMenuItemRequestDTO requestDTO, MultipartFile image) throws BadRequestException, IOException {
 
-        List<String> menuCategories = menuCategoryRepository.findByMerchantId(requestDTO.getMerchantId()).stream()
-                .map(MenuCategory::getName)
+        List<UUID> menuCategories = menuCategoryRepository.findByMerchantId(requestDTO.getMerchantId()).stream()
+                .map(MenuCategory::getId)
                 .toList();
 
-        if (!menuCategories.contains(requestDTO.getName())) {
+        if (!menuCategories.contains(requestDTO.getCategoryId())) {
             throw new BadRequestException("Category Does not Exists");
         }
 
-        String filePath = requestDTO.getMerchantId().toString() + "/" + image.getOriginalFilename();
+        String filePath = requestDTO.getMerchantId().toString() + "/" + requestDTO.getName();
         String imageLink = cloudflareR2Service.UploadFile(filePath, image);
 
         MenuItem menuItem = CreateMenuItemRequestDTO.toMenuItem(requestDTO, imageLink);
