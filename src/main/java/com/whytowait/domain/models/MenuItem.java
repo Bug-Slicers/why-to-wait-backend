@@ -35,7 +35,7 @@ public class MenuItem {
     private String description;
 
     @NotNull
-    @Column(name = "category_id", nullable = false)
+    @Column(name = "category", nullable = false)
     private UUID categoryId;
 
     @NotNull

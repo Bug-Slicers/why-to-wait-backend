@@ -28,17 +28,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ApiResponse handleGenericException(Exception ex) {
-        if(ex instanceof ApiException){
+        if (ex instanceof ApiException) {
             return ApiException.handle((ApiException) ex);
         }
         return new InternalErrorResponse();
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ApiResponse handleRunTimeException(RuntimeException ex){
-        if(ex.getCause() instanceof ApiException){
-            return  ApiException.handle((ApiException) ex.getCause());
+    public ApiResponse handleRunTimeException(RuntimeException ex) {
+        if (ex.getCause() instanceof ApiException) {
+            return ApiException.handle((ApiException) ex.getCause());
         }
         return new InternalErrorResponse();
-    };
+    }
+
+    ;
 }
