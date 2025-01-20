@@ -10,4 +10,8 @@ import java.util.UUID;
 @Repository
 public interface MenuCategoryRepository extends JpaRepository<MenuCategory, UUID> {
     List<MenuCategory> findByMerchantId(UUID id);
+
+    List<MenuCategory> findByMerchantIdAndName(UUID merchantId, String name);
+
+    List<MenuCategory> findByMerchantIdAndId(UUID merchantId, UUID id);
 }

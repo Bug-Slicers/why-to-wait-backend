@@ -4,6 +4,8 @@ import com.whytowait.core.annotations.ValidEnum;
 import com.whytowait.domain.models.MenuItem;
 import com.whytowait.domain.models.enums.ItemTag;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.UUID;
@@ -14,6 +16,7 @@ public class CreateMenuItemRequestDTO {
     private UUID merchantId;
 
     @NotNull(message = "Name of the item cannot be empty")
+    @Size(min = 3, max = 50, message = "Name of the category must be between 3 and 50 characters")
     private String name;
 
     private String description;
@@ -26,6 +29,7 @@ public class CreateMenuItemRequestDTO {
     private String tag;
 
     @NotNull(message = "Price is mandatory")
+    @Positive(message = "Price must be greater than 0")
     private Float Price;
 
     public static MenuItem toMenuItem(CreateMenuItemRequestDTO data, String imageLink) {

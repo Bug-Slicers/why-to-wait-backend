@@ -27,17 +27,17 @@ public class MenuController {
     @Autowired
     MenuService menuService;
 
-    @CheckMerchantManagerRole(requiredAuthority = MerchantRole.MERCHANT_OWNER, fieldName = "MerchantId", source = RequestSource.BODY)
+    @CheckMerchantManagerRole(requiredAuthority = MerchantRole.MERCHANT_OWNER, fieldName = "merchantId", source = RequestSource.BODY)
     @PostMapping(path = "/create-category")
-    public ApiResponse<CreateMenuCategoryResponseDTO> CreateMenuCategory(@Valid @RequestBody CreateMenuCategoryRequestDTO requestDTO) throws BadRequestException {
-        MenuCategory response = menuService.CreateMenuCategory(requestDTO);
+    public ApiResponse<CreateMenuCategoryResponseDTO> createMenuCategory(@Valid @RequestBody CreateMenuCategoryRequestDTO requestDTO) throws BadRequestException {
+        MenuCategory response = menuService.createMenuCategory(requestDTO);
         return new SuccessResponse<>("Menu Category Created Successfully", CreateMenuCategoryResponseDTO.fromMenuCategory(response));
     }
 
-    @CheckMerchantManagerRole(requiredAuthority = MerchantRole.MERCHANT_OWNER, fieldName = "MerchantId", source = RequestSource.BODY)
+    @CheckMerchantManagerRole(requiredAuthority = MerchantRole.MERCHANT_OWNER, fieldName = "merchantId", source = RequestSource.BODY)
     @PostMapping(path = "/create-item", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<MenuItem> CreateMenuItem(@RequestPart(value = "imageFile", required = false) MultipartFile imageFile, @RequestPart("menuItem") CreateMenuItemRequestDTO requestDTO) throws BadRequestException, IOException {
-        MenuItem response = menuService.CreateMenuItem(requestDTO, imageFile);
+    public ApiResponse<MenuItem> createMenuItem(@RequestPart(value = "imageFile", required = false) MultipartFile imageFile, @Valid @RequestPart("menuItem") CreateMenuItemRequestDTO requestDTO) throws BadRequestException, IOException {
+        MenuItem response = menuService.createMenuItem(requestDTO, imageFile);
         return new SuccessResponse<MenuItem>("Menu Item Created Successfully", response);
     }
 

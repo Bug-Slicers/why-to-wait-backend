@@ -31,11 +31,10 @@ public class MenuService {
     MenuItemRepository menuItemRepository;
 
     @Transactional
-    public MenuCategory CreateMenuCategory(CreateMenuCategoryRequestDTO requestDTO) throws BadRequestException {
+    public MenuCategory createMenuCategory(CreateMenuCategoryRequestDTO requestDTO) throws BadRequestException {
 
-        List<String> menuCategories = menuCategoryRepository.findByMerchantId(requestDTO.getMerchantId()).stream()
-                .map(MenuCategory::getName)
-                .toList();
+        List<String> menuCategories = menuCategoryRepository.findByMerchantIdAndName(requestDTO.getMerchantId(), requestDTO.getName()).stream()
+                .map(MenuCategory::getName).toList();
         if (menuCategories.contains(requestDTO.getName())) {
             throw new BadRequestException("Category already Exists");
         }
@@ -47,9 +46,9 @@ public class MenuService {
     }
 
     @Transactional
-    public MenuItem CreateMenuItem(CreateMenuItemRequestDTO requestDTO, MultipartFile image) throws BadRequestException, IOException {
+    public MenuItem createMenuItem(CreateMenuItemRequestDTO requestDTO, MultipartFile image) throws BadRequestException, IOException {
 
-        List<UUID> menuCategories = menuCategoryRepository.findByMerchantId(requestDTO.getMerchantId()).stream()
+        List<UUID> menuCategories = menuCategoryRepository.findByMerchantIdAndId(requestDTO.getMerchantId(), requestDTO.getCategoryId()).stream()
                 .map(MenuCategory::getId)
                 .toList();
 
