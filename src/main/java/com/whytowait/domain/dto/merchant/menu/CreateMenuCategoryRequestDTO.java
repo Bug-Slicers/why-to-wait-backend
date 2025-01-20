@@ -2,7 +2,6 @@ package com.whytowait.domain.dto.merchant.menu;
 
 import com.whytowait.domain.models.MenuCategory;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 

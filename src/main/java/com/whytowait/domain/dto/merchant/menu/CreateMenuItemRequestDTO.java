@@ -42,15 +42,4 @@ public class CreateMenuItemRequestDTO {
                 .imageUrl(imageLink)
                 .build();
     }
-
-    public static MenuItem toMenuItem(CreateMenuItemRequestDTO data) {
-        return MenuItem.builder().merchantId(data.getMerchantId())
-                .name(data.getName())
-                .description(data.getDescription())
-                .categoryId(data.getCategoryId())
-                .tag(ItemTag.valueOf(data.getTag()))
-                .price(data.getPrice())
-                .imageUrl(null)
-                .build();
-    }
 }
