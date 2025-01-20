@@ -16,6 +16,9 @@ public class CloudflareR2Service {
     @Value("${cloudflare.bucket_name}")
     private String BUCKET;
 
+    @Value("${cloudflare.r2DevURL}")
+    private String r2DevURL;
+
     public CloudflareR2Service(S3Client s3Client) {
         this.s3Client = s3Client;
     }
@@ -30,6 +33,6 @@ public class CloudflareR2Service {
                         .build(),
                 RequestBody.fromInputStream(file.getInputStream(), file.getSize())
         );
-        return "https://" + BUCKET + ".r2.cloudflarestorage.com/" + path;
+        return r2DevURL + path;
     }
 }

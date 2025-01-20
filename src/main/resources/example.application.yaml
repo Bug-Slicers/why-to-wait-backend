@@ -32,3 +32,4 @@ cloudflare:
   secret_key: ""
   token: ""
   s3Client: ""
+  r2DevURL: ""
