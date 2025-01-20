@@ -46,6 +46,7 @@ public class MenuService {
         return menuCategory;
     }
 
+    @Transactional
     public MenuItem CreateMenuItem(CreateMenuItemRequestDTO requestDTO, MultipartFile image) throws BadRequestException, IOException {
 
         List<UUID> menuCategories = menuCategoryRepository.findByMerchantId(requestDTO.getMerchantId()).stream()
