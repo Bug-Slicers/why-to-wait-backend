@@ -1,33 +1,25 @@
 package com.whytowait.api.v1.controllers;
 
-import com.whytowait.api.common.responses.ApiResponse;
+import com.whytowait.api.common.exceptions.BadRequestException;
 import com.whytowait.api.common.responses.SuccessResponse;
 import com.whytowait.api.v1.services.FetchMerchantInfoService;
-import com.whytowait.domain.dto.fetchMerchantInfo.FetchBasicAndTimingResDTO;
-import com.whytowait.domain.dto.fetchMerchantInfo.FetchBasicInfoDTO;
-import com.whytowait.domain.dto.fetchMerchantInfo.FetchMerchantInfoReqDTO;
-import com.whytowait.domain.dto.time.TimingReqDTO;
-import jakarta.validation.Valid;
+import com.whytowait.domain.dto.fetchMerchantInfo.FetchMerchantInfoResDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/fetch")
+@RequestMapping(path = "/get")
 public class FetchMerchantInfoController {
 
     @Autowired
     FetchMerchantInfoService fetchMerchantInfoService;
 
-    @GetMapping(path = "/merchant")
-    public SuccessResponse<FetchBasicAndTimingResDTO> fetchMerchantInfo(@RequestParam(name = "query") String query , @RequestBody FetchMerchantInfoReqDTO requestDTO) {
+    @GetMapping(path = "/merchants")
+    public SuccessResponse<FetchMerchantInfoResDTO> fetchMerchantInfo(@RequestParam(name = "merchantId") UUID merchantId, @RequestParam(name = "query") String query) throws BadRequestException {
 
-        FetchBasicAndTimingResDTO fetchBasicInfoDTO = fetchMerchantInfoService.getMerchantUserDetails(requestDTO.getMid(), query);
-        String responseMessage ="Merchant Data Fetched";
-        if(fetchBasicInfoDTO==null){
-            responseMessage = "Enter valid queryType ";
-        }
-        return new SuccessResponse<FetchBasicAndTimingResDTO>(responseMessage,fetchBasicInfoDTO);
+        FetchMerchantInfoResDTO fetchBasicInfoDTO = fetchMerchantInfoService.getMerchantUserDetails(merchantId, query);
+        return new SuccessResponse<FetchMerchantInfoResDTO>("Data Fetched Successfully!",fetchBasicInfoDTO);
     }
 }

@@ -23,4 +23,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query(nativeQuery = true, value = "select last_logout from users where mobile=:mobile")
     Date findLastLogoutByMobile(String mobile);
+
+    @Modifying
+    @Query(nativeQuery = true, value = "update users set first_name=:firstName,last_name=:lastName, email=:email where id=:userId")
+    Integer updateUserInfo(String firstName,String lastName,String email, UUID userId);
 }

@@ -13,10 +13,10 @@ public class TimingDTO {
     private LocalTime closeTime;
     private Boolean isClosed;
 
-    public TimingDTO(DayOfWeek dayOfWeek, LocalTime openTime, LocalTime closeTime, Boolean isClosed) {
-        this.dayOfWeek = dayOfWeek;
-        this.openTime = openTime;
-        this.closeTime = closeTime;
-        this.isClosed = isClosed;
-    }
+//    public TimingDTO(DayOfWeek dayOfWeek, LocalTime openTime, LocalTime closeTime, Boolean isClosed) {
+//        this.dayOfWeek = dayOfWeek;
+//        this.openTime = openTime;
+//        this.closeTime = closeTime;
+//        this.isClosed = isClosed;
+//    }
 }

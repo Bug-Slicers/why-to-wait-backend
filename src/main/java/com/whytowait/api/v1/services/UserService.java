@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -80,5 +81,14 @@ public class UserService {
             return "Logout Successful";
         }
         return "Logout Failed";
+    }
+
+    @Transactional
+    public Optional<User> updateUserDetails(User user){
+        Integer res = userRepository.updateUserInfo(user.getFirstName(),user.getLastName(),user.getEmail(),user.getId());
+        if(res==0){
+            return null;
+        }
+        return  userRepository.findById(user.getId());
     }
 }

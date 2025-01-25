@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class FetchBasicAndTimingResDTO {
-    private FetchBasicInfoDTO basicInfo;
+public class FetchMerchantInfoResDTO {
+    private FetchBasicInfoAndAddressDTO basicAndAddressInfo;
     private List<TimingDTO> timings;
 }
