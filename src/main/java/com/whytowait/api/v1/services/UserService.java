@@ -83,12 +83,4 @@ public class UserService {
         return "Logout Failed";
     }
 
-    @Transactional
-    public Optional<User> updateUserDetails(User user){
-        Integer res = userRepository.updateUserInfo(user.getFirstName(),user.getLastName(),user.getEmail(),user.getId());
-        if(res==0){
-            return null;
-        }
-        return  userRepository.findById(user.getId());
-    }
 }

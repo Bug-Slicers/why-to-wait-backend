@@ -4,7 +4,5 @@ import lombok.Data;
 
 @Data
 public class UpdateMerchantDetailReqDTO {
-    private String  firstName;
-    private String  lastName;
-    private String  email;
+    private String  restaurantName;
 }

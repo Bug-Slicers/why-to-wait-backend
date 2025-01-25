@@ -1,8 +1,6 @@
 package com.whytowait.api.common.enums;
 
-import com.whytowait.api.common.exceptions.BadRequestException;
-
-public enum ParamType{
+public enum MerchantInfoQueryParamsType {
 
     BASIC("basic"),
     BASIC_ADDRESS("basic address"),
@@ -11,7 +9,7 @@ public enum ParamType{
 
     private final String value;
 
-    ParamType(String value) {
+    MerchantInfoQueryParamsType(String value) {
         this.value = value;
     }
 
@@ -19,8 +17,8 @@ public enum ParamType{
         return value;
     }
 
-    public static ParamType fromString(String text) {
-        for (ParamType type : ParamType.values()) {
+    public static MerchantInfoQueryParamsType fromString(String text) {
+        for (MerchantInfoQueryParamsType type : MerchantInfoQueryParamsType.values()) {
             if (type.value.equalsIgnoreCase(text)) {
                 return type;
             }

@@ -32,21 +32,11 @@ public class MerchantController {
         return new SuccessResponse<CreateMerchantResponseDTO>("Merchant Created Successfully", CreateMerchantResponseDTO.fromMerchant(response));
     }
 
-    @PostMapping(path = "/update-address")
-    public ApiResponse<Address> updateMerchant(@Valid @RequestBody UpdateMerchantAddressReqDTO requestDTO) throws BadRequestException {
-        Address  response = merchantCreateService.updateMerchantAddress(requestDTO);
-        if(response==null){
-            return new SuccessResponse<Address>("Merchant Not Found/Exception Occured");
-        }
-        else{
-            return new SuccessResponse<Address>("Merchant Updated Successfully",response);
-        }
-    }
 
     @PostMapping(path = "/update-basic")
-    public ApiResponse<User > updateBasicInfo(@Valid @RequestBody UpdateMerchantDetailReqDTO requestDTO) throws BadRequestException {
-        User res = merchantCreateService.updateMerchantBasicInfo(requestDTO);
-        return new SuccessResponse<User>("User Updated Successfully",res);
+    public ApiResponse<String > updateBasicInfo(@Valid @RequestBody UpdateMerchantDetailReqDTO requestDTO) throws BadRequestException {
+        String res = merchantCreateService.updateMerchantBasicInfo(requestDTO);
+        return new SuccessResponse<String>("Merchant Updated Successfully",res);
 
     }
 }

@@ -1,6 +1,6 @@
 package com.whytowait.api.v1.services;
 
-import com.whytowait.api.common.enums.ParamType;
+import com.whytowait.api.common.enums.MerchantInfoQueryParamsType;
 import com.whytowait.api.common.exceptions.BadRequestException;
 import com.whytowait.domain.dto.fetchMerchantInfo.FetchMerchantInfoResDTO;
 import com.whytowait.domain.dto.fetchMerchantInfo.FetchBasicInfoAndAddressDTO;
@@ -20,21 +20,21 @@ public class FetchMerchantInfoService {
 
     public FetchMerchantInfoResDTO getMerchantUserDetails(UUID mid, String param) throws BadRequestException {
         FetchMerchantInfoResDTO resDTO = new FetchMerchantInfoResDTO();
-        ParamType paramType = ParamType.fromString(param);
+        MerchantInfoQueryParamsType merchantInfoQueryParamsType = MerchantInfoQueryParamsType.fromString(param);
 
-        if(paramType == ParamType.BASIC){
+        if(merchantInfoQueryParamsType == MerchantInfoQueryParamsType.BASIC){
             FetchBasicInfoAndAddressDTO fetchBasicInfoAndAddressDTO = fetchMerchantInfoRepo.fetchMerchantUserBasicDetails(mid);
             resDTO.setBasicAndAddressInfo(fetchBasicInfoAndAddressDTO);
             System.out.println("resDTO:"+resDTO);
             return  resDTO;
         }
-        else if(paramType == ParamType.BASIC_ADDRESS){
+        else if(merchantInfoQueryParamsType == MerchantInfoQueryParamsType.BASIC_ADDRESS){
             FetchBasicInfoAndAddressDTO fetchBasicInfoAndAddressDTO =fetchMerchantInfoRepo.fetchMerchantUserBasicAndAddressDetails(mid);
             resDTO.setBasicAndAddressInfo(fetchBasicInfoAndAddressDTO);
             System.out.println("resDTO:"+resDTO);
             return  resDTO;
         }
-        else if(paramType == ParamType.BASIC_TIMING){
+        else if(merchantInfoQueryParamsType == MerchantInfoQueryParamsType.BASIC_TIMING){
             FetchBasicInfoAndAddressDTO fetchBasicInfoAndAddressDTO =fetchMerchantInfoRepo.fetchMerchantUserBasicDetails(mid);
             List<TimingDTO> timings = fetchMerchantInfoRepo.fetchTimingDetails(mid);
             resDTO.setBasicAndAddressInfo(fetchBasicInfoAndAddressDTO);
@@ -42,7 +42,7 @@ public class FetchMerchantInfoService {
             System.out.println("resDTO:"+resDTO);
             return  resDTO;
         }
-        else if(paramType == ParamType.BASIC_ADDRESS_TIMING){
+        else if(merchantInfoQueryParamsType == MerchantInfoQueryParamsType.BASIC_ADDRESS_TIMING){
             FetchBasicInfoAndAddressDTO fetchBasicInfoAndAddressDTO =fetchMerchantInfoRepo.fetchMerchantUserBasicAndAddressDetails(mid);
             List<TimingDTO> timings = fetchMerchantInfoRepo.fetchTimingDetails(mid);
             resDTO.setBasicAndAddressInfo(fetchBasicInfoAndAddressDTO);

@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -67,41 +68,18 @@ public class MerchantService {
     }
 
 
-    public Address updateMerchantAddress(UpdateMerchantAddressReqDTO updateMerchantAddressReqDTO) throws BadRequestException {
-
+    @Transactional
+    public String updateMerchantBasicInfo(UpdateMerchantDetailReqDTO reqDTO) throws BadRequestException{
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsDTO userDetails = (UserDetailsDTO) authentication.getPrincipal();
-        User user = userRepository.findByMobile(userDetails.getMobile());
-        Merchant fetchMerchantByOwnerId = merchantRepository.findByOwnerId(user.getId());
-        Address address = Address.builder().addressLine1(updateMerchantAddressReqDTO.getAddressLine1())
-                .addressLine2(updateMerchantAddressReqDTO.getAddressLine2())
-                .city(updateMerchantAddressReqDTO.getCity())
-                .district(updateMerchantAddressReqDTO.getDistrict())
-                .state(updateMerchantAddressReqDTO.getState())
-                .pincode(updateMerchantAddressReqDTO.getPincode())
-                .build();
 
-        int resMsg= addressService.updateAddress(address,fetchMerchantByOwnerId.getAddress().getId());
-        if(resMsg==1){
-            return  address;
-        }
-        return  null;
-    }
-
-    public User updateMerchantBasicInfo(UpdateMerchantDetailReqDTO reqDTO) throws BadRequestException{
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsDTO userDetails = (UserDetailsDTO) authentication.getPrincipal();
-        User userToUpdate = Objects.requireNonNull(User.builder().
-                firstName(reqDTO.getFirstName()).
-                lastName(reqDTO.getLastName()).
-                email(reqDTO.getEmail()).
-                id(userDetails.getId())).build();
-
-        Optional<User> res = userService.updateUserDetails(userToUpdate);
-        if(res==null || res.isEmpty()){
+        Integer res = merchantRepository.updateMerchantInfo(reqDTO.getRestaurantName(),userDetails.getId());
+        if(res==null){
             throw new BadRequestException("Unexpected Exception occured while updating merchantbasic info");
         }
-        return res.get();
+        System.out.println("fetched Merchant using owner Id : "+merchantRepository.findByOwnerId(userDetails.getId()));
+        Merchant res2 = merchantRepository.findByOwnerId(userDetails.getId());
+        return "Updation Success with new restaurantName :"+res2.getRestaurantName();
 
     }
 }

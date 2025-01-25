@@ -36,7 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
             "/auth/login",
             "/auth/signup",
             "/auth/refresh-token",
-            "/get/merchants"
+            "/public/merchants"
     );
 
     @Autowired

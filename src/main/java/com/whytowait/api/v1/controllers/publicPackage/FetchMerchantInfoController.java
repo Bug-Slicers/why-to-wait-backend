@@ -1,4 +1,4 @@
-package com.whytowait.api.v1.controllers;
+package com.whytowait.api.v1.controllers.publicPackage;
 
 import com.whytowait.api.common.exceptions.BadRequestException;
 import com.whytowait.api.common.responses.SuccessResponse;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(path = "/get")
+@RequestMapping(path = "/public")
 public class FetchMerchantInfoController {
 
     @Autowired
