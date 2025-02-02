@@ -1,9 +1,9 @@
-package com.whytowait.domain.dto.fetchMerchantInfo;
+package com.whytowait.domain.dto.publicMerchantInfo;
 
 import lombok.Data;
 
 @Data
-public class FetchBasicInfoAndAddressDTO {
+public class PublicBasicInfoAndAddressDTO {
     private String restaurantName;
     private String firstName;
     private String lastName;

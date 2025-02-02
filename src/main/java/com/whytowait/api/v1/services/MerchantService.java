@@ -2,7 +2,6 @@ package com.whytowait.api.v1.services;
 
 import com.whytowait.api.common.exceptions.BadRequestException;
 import com.whytowait.domain.dto.merchant.CreateMerchantRequestDTO;
-import com.whytowait.domain.dto.merchant.UpdateMerchantAddressReqDTO;
 import com.whytowait.domain.dto.merchant.UpdateMerchantDetailReqDTO;
 import com.whytowait.domain.dto.user.UserDetailsDTO;
 import com.whytowait.domain.models.Address;
@@ -20,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -69,17 +67,13 @@ public class MerchantService {
 
 
     @Transactional
-    public String updateMerchantBasicInfo(UpdateMerchantDetailReqDTO reqDTO) throws BadRequestException{
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsDTO userDetails = (UserDetailsDTO) authentication.getPrincipal();
-
-        Integer res = merchantRepository.updateMerchantInfo(reqDTO.getRestaurantName(),userDetails.getId());
-        if(res==null){
-            throw new BadRequestException("Unexpected Exception occured while updating merchantbasic info");
+    public String updateMerchantBasicInfo(UUID merchantId, UpdateMerchantDetailReqDTO reqDTO) throws BadRequestException {
+        Integer res = merchantRepository.updateMerchantInfo(reqDTO.getRestaurantName(), merchantId);
+        if (res == null) {
+            throw new BadRequestException("No Merchant Found.");
         }
-        System.out.println("fetched Merchant using owner Id : "+merchantRepository.findByOwnerId(userDetails.getId()));
-        Merchant res2 = merchantRepository.findByOwnerId(userDetails.getId());
-        return "Updation Success with new restaurantName :"+res2.getRestaurantName();
-
+        System.out.println("fetched Merchant using owner Id : " + merchantRepository.findById(merchantId));
+        Optional<Merchant> res2 = merchantRepository.findById(merchantId);
+        return "Updation Success with new restaurantName :" + res2.get().getRestaurantName();
     }
 }

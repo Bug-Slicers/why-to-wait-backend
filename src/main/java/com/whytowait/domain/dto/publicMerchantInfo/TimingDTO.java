@@ -1,10 +1,9 @@
-package com.whytowait.domain.dto.fetchMerchantInfo;
+package com.whytowait.domain.dto.publicMerchantInfo;
 
 import com.whytowait.domain.models.enums.DayOfWeek;
 import lombok.Data;
 
 import java.time.LocalTime;
-import java.util.UUID;
 
 @Data
 public class TimingDTO {
