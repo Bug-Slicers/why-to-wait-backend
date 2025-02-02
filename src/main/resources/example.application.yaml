@@ -15,7 +15,21 @@ spring:
     show-sql: true
   liquibase:
     change-log: changelog-master.yaml
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB   # Maximum size for a single file
+      max-request-size: 15MB # Maximum size for the whole request (all parts)
 
 jwt:
   secret_key: "yourVerySecretKeyKeepItLong"
   refresh_token_secret_key: "yourVeryVerySecretKeyForRefreshTokenKeepItLong"
+
+cloudflare:
+  bucket_name: ""
+  account_id: ""
+  access_key: ""
+  secret_key: ""
+  token: ""
+  s3Client: ""
+  r2DevURL: ""

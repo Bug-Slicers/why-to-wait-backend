@@ -24,11 +24,11 @@ public class MerchantController {
     JwtService jwtService;
 
     @Autowired
-    MerchantService merchantCreateService;
+    MerchantService merchantService;
 
     @PostMapping(path = "/create")
     public ApiResponse<CreateMerchantResponseDTO> createMerchant(@Valid @RequestBody CreateMerchantRequestDTO requestDTO) throws BadRequestException {
-        Merchant response = merchantCreateService.createMerchant(requestDTO);
+        Merchant response = merchantService.createMerchant(requestDTO);
         return new SuccessResponse<CreateMerchantResponseDTO>("Merchant Created Successfully", CreateMerchantResponseDTO.fromMerchant(response));
     }
 
