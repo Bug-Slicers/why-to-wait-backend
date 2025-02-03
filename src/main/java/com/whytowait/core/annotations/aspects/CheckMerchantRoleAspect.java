@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerMapping;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -67,14 +68,13 @@ public class CheckMerchantRoleAspect {
 
         try {
             if (RequestSource.PARAM == source) {
-
-                return request.getParameter(sourceField);
-
-            } else if (RequestSource.HEADER == source) {
-
+                Map<String, String> parameters = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+                return parameters.get(sourceField);
+            }
+            if (RequestSource.HEADER == source) {
                 return request.getHeader(sourceField);
-
-            } else if (RequestSource.BODY == source) {
+            }
+            if (RequestSource.BODY == source) {
 
                 Object[] args = joinPoint.getArgs();
                 for (Object arg : args) {
